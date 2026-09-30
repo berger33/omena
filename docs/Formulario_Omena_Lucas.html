@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12213a">
+  <title>Formulário Omena — Will &amp; Lucas | Validação de Ideias</title>
+  <style>
+:root{
+  --bg:#f4f7fb; --card:#fff; --ink:#0e1726; --muted:#5a6b81; --line:#d7e0ec;
+  --accent:#1e5eff; --accent-ink:#fff; --ok:#0f9d58; --warn:#b26a00; --danger:#b3261e;
+  --radius:14px; --shadow:0 6px 20px rgba(20,40,80,.08);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size:16px; line-height:1.45;
+  padding:12px 12px 36px;
+}
+input,select,textarea,button{font:inherit;color:inherit}
+
+.container{max-width:980px;margin:0 auto}
+
+/* Cabeçalho */
+.topo{
+  background:linear-gradient(135deg,#12213a,#1e5eff 55%,#5f8dff);
+  color:#fff;border-radius:var(--radius);padding:16px 14px;margin-bottom:14px;box-shadow:var(--shadow);
+}
+.topo h1{margin:0 0 6px;font-size:clamp(1.35rem,5.6vw,2.15rem);line-height:1.2}
+.topo .sub{margin:0;opacity:.92;font-size:clamp(.85rem,3.4vw,1.05rem)}
+.logo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{
+  width:44px;height:44px;border-radius:12px;background:#fff;color:#1e5eff;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.78rem;letter-spacing:.04em;flex:0 0 auto;
+}
+
+/* Barra de status / ações / abas */
+.barra{
+  display:flex;flex-direction:column;gap:10px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;margin-bottom:14px;box-shadow:var(--shadow);
+}
+.barra .salvo{color:var(--muted);font-size:.86rem}
+.acoes{display:flex;flex-direction:column;gap:10px}
+.btn{
+  appearance:none;border:1px solid transparent;border-radius:12px;cursor:pointer;
+  padding:12px 14px;font-weight:600;font-size:.95rem;line-height:1.25;
+  transition:.18s ease;display:inline-flex;align-items:center;justify-content:center;
+  min-height:48px;text-align:center;white-space:normal;
+  touch-action:manipulation;-webkit-tap-highlight-color:rgba(30,94,255,.18);
+}
+.btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 18px rgba(30,94,255,.22)}
+.btn-primary:hover{filter:brightness(1.05)}
+.btn-ghost{background:#fff;color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{border-color:#a9b7cc}
+.btn-danger{background:#fff;color:var(--danger);border-color:#f0c2be}
+.btn-danger:hover{background:#fff1f0}
+.btn:active{transform:translateY(1px)}
+
+/* Abas principais */
+.abas{display:flex;gap:8px;margin:2px 0 12px;flex-wrap:wrap}
+.aba{
+  flex:1 1 calc(50% - 8px);min-width:0;min-height:48px;
+  background:#e6ecf6;border:1px solid var(--line);color:#2a3c56;
+  border-radius:12px;padding:11px 12px;font-weight:600;font-size:.92rem;cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:rgba(30,94,255,.18);
+}
+.aba.ativa{background:var(--accent);color:#fff;border-color:transparent}
+.aba-painel{display:block}
+.hidden{display:none !important}
+
+/* Seções */
+.form-section{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 14px;margin:14px 0;box-shadow:var(--shadow);
+}
+.form-section h2{margin:0 0 12px;font-size:1.18rem}
+.form-section h3{margin:16px 0 10px;font-size:1.02rem}
+.grid-2{display:grid;grid-template-columns:1fr;gap:12px}
+.linha{display:flex;flex-direction:column;gap:5px;margin:10px 0}
+.linha label{font-weight:600;font-size:.92rem}
+.full{width:100%}
+input[type="text"],input[type="number"],input[type="date"],select,textarea{
+  width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;
+  padding:11px 12px;font-size:16px;min-height:46px;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+textarea{resize:vertical;min-height:88px;line-height:1.5}
+small{color:var(--muted);font-size:.85rem;display:block;line-height:1.4}
+
+/* corrige cor da data vazia em navegadores WebKit */
+input[type="date"]{color:var(--ink)}
+input[type="date"].vazio{color:#7b8aa0}
+
+/* sub-abas (campos de Lucas) */
+.sub-abas{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));
+  gap:8px;margin:10px 0 12px;
+}
+.sub-aba{
+  min-width:0;min-height:46px;
+  background:#eef2f8;border:1px solid var(--line);border-radius:999px;
+  padding:10px 12px;font-weight:600;font-size:.88rem;cursor:pointer;color:#2a3c56;
+  touch-action:manipulation;-webkit-tap-highlight-color:rgba(30,94,255,.18);
+}
+.sub-aba.ativa{background:#0e1726;color:#fff;border-color:transparent}
+
+/* Progresso */
+.progresso{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom));
+  width:min(92vw,420px);background:#0e1726;color:#fff;
+  padding:10px 12px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+  z-index:50;display:none;text-align:center;font-size:.92rem;
+}
+.progresso .bar{height:8px;background:#2c3d57;border-radius:999px;overflow:hidden;margin-top:8px}
+.progresso .bar > div{height:100%;width:0;background:linear-gradient(90deg,#5f8dff,#7cf3c4);transition:width .25s ease}
+
+/* Toast */
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%) translateY(20px);
+  bottom:calc(18px + env(safe-area-inset-bottom));
+  background:#0e1726;color:#fff;padding:12px 16px;border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:60;opacity:0;transition:.25s ease;
+  pointer-events:none;max-width:min(92vw,520px);text-align:center;font-size:.92rem;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--ok)}
+.toast.err{background:var(--danger)}
+
+footer{margin:22px 0 8px;color:var(--muted);font-size:.82rem;text-align:center}
+
+/* ===== Celular em pé (vertical): tudo em coluna única ===== */
+@media (max-width:640px){
+  .btn{width:100%}
+  .aba{font-size:.88rem}
+  .form-section h2{font-size:1.12rem}
+  .topo{padding:14px 12px}
+}
+
+/* ===== Telas maiores / celular deitado ===== */
+@media (min-width:641px){
+  body{padding:20px 18px 36px}
+  .topo{padding:22px}
+  .barra{flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .acoes{flex-direction:row;flex-wrap:wrap}
+  .acoes .btn{flex:1 1 200px;width:auto;white-space:nowrap}
+  .aba{flex:1 1 auto}
+  .form-section{padding:22px}
+  .form-section h2{font-size:1.35rem}
+  .linha{flex-direction:row;align-items:center;gap:12px}
+  .linha label{width:170px;flex:0 0 170px}
+}
+@media (min-width:721px){
+  .grid-2{grid-template-columns:1fr 1fr}
+}
+
+/* Impressão (gerar PDF direto do navegador) */
+@media print{
+  body{background:#fff;padding:0}
+  .no-print, .barra, .abas, .sub-abas, .toast, .progresso, footer{display:none !important}
+  .topo{background:#fff;color:#000;box-shadow:none;border:1px solid #ccc}
+  .form-section{box-shadow:none;border:1px solid #bbb;page-break-inside:avoid}
+}
+@page{margin:14mm}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topo">
+      <div class="logo-row">
+        <div class="logo">OMENA</div>
+        <div>
+          <h1>Formulário de Validação — Will &amp; Lucas</h1>
+          <p class="sub">Pesquisa de ideias · Perguntas de passado · Aba “Dores do Lucas” editável · Autosave no navegador</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="barra">
+      <div class="salvo" id="status">Salvo automaticamente neste navegador.</div>
+      <div class="acoes">
+        <button class="btn btn-primary" id="btnSalvar" type="button">Salvar agora (navegador)</button>
+        <button class="btn btn-ghost" id="btnExportar" type="button">Baixar backup JSON</button>
+        <button class="btn btn-danger" id="btnLimpar" type="button">Limpar dados salvos</button>
+      </div>
+      <div class="abas" role="tablist">
+        <button class="aba ativa" data-aba="seccoes" type="button">Modo Seções</button>
+        <button class="aba" data-aba="campos" type="button">Modo Campos (Bia, Perguntas e Dores)</button>
+      </div>
+    </section>
+
+    <!-- ===================== MODO SEÇÕES ===================== -->
+    <div id="painelSeccoes" class="aba-painel ativa">
+
+      <!-- 1. Identificação -->
+      <section class="form-section">
+        <h2>1. Identificação</h2>
+        <div class="grid-2">
+          <div class="linha">
+            <label>Nome</label>
+            <input type="text" data-campo="nome">
+          </div>
+          <div class="linha">
+            <label>Data da conversa</label>
+            <input type="date" data-campo="data">
+          </div>
+          <div class="linha">
+            <label>Entrevistador</label>
+            <input type="text" data-campo="entrevistador">
+          </div>
+          <div class="linha">
+            <label>Tempo previsto</label>
+            <select data-campo="tempoPrevisto">
+              <option value="">Selecione...</option>
+              <option value="30 a 45 min">30 a 45 min</option>
+              <option value="15 a 20 min">15 a 20 min</option>
+              <option value="mais de 45 min">mais de 45 min</option>
+            </select>
+          </div>
+          <div class="linha">
+            <label>Tempo real</label>
+            <input type="text" data-campo="tempoReal" placeholder="ex.: 38 min">
+          </div>
+          <div class="linha">
+            <label>Idade aproximada</label>
+            <input type="text" data-campo="idade">
+          </div>
+          <div class="linha">
+            <label>Função</label>
+            <input type="text" data-campo="funcao">
+          </div>
+          <div class="linha">
+            <label>Cidade</label>
+            <input type="text" data-campo="cidade">
+          </div>
+          <div class="linha">
+            <label>Telefone</label>
+            <input type="text" data-campo="telefone">
+          </div>
+          <div class="linha">
+            <label>E-mail</label>
+            <input type="text" data-campo="email">
+          </div>
+          <div class="linha">
+            <label>Empresa/Laboratório</label>
+            <input type="text" data-campo="empresa">
+          </div>
+          <div class="linha">
+            <label>Conexão</label>
+            <select data-campo="conexao">
+              <option value="">Selecione...</option>
+              <option value="Indicação">Indicação</option>
+              <option value="Contato próprio">Contato próprio</option>
+              <option value="Rede profissional">Rede profissional</option>
+              <option value="Evento / associação">Evento / associação</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Contexto de trabalho -->
+      <section class="form-section">
+        <h2>2. Contexto de trabalho</h2>
+        <div class="linha">
+          <label>Tipo de empresa/laboratório</label>
+          <input type="text" data-campo="tipoEmpresa">
+        </div>
+        <div class="linha">
+          <label>O que a empresa faz (análises, serviços, indústria etc.)</label>
+          <input type="text" data-campo="oqueEmpresaFaz">
+        </div>
+        <div class="grid-2">
+          <div class="linha">
+            <label>Setor exato</label>
+            <input type="text" data-campo="setorExato">
+          </div>
+          <div class="linha">
+            <label>Tipo de operação</label>
+            <input type="text" data-campo="tipoOperacao">
+          </div>
+          <div class="linha">
+            <label>Porte (nº de pessoas)</label>
+            <input type="text" data-campo="portePessoas">
+          </div>
+          <div class="linha">
+            <label>Volume: amostras/análises por semana</label>
+            <input type="text" data-campo="volumeAmostras">
+          </div>
+        </div>
+        <div class="linha">
+          <label>Como o trabalho é organizado hoje (planilha, sistema, papel, WhatsApp…)</label>
+          <textarea data-campo="trabalhoOrganizado"></textarea>
+        </div>
+      </section>
+
+      <!-- 3. Dia a dia -->
+      <section class="form-section">
+        <h2>3. Dia a dia</h2>
+        <div class="linha">
+          <label>Me conta o seu último dia de trabalho, do começo ao fim.</label>
+          <textarea data-campo="ultimoDia" placeholder="Fluxo real do trabalho, sem filtro..."></textarea>
+        </div>
+        <div class="linha">
+          <label>Retrabalho: o que precisou refazer ou digitar duas vezes nesta semana?</label>
+          <textarea data-campo="retrabalho"></textarea>
+        </div>
+        <div class="linha">
+          <label>Organização: o que perdeu tempo procurando (documento, resultado, lote, certificado…)?</label>
+          <textarea data-campo="tempoProcurando"></textarea>
+        </div>
+        <div class="linha">
+          <label>Automação: o que ainda está em planilha, papel ou WhatsApp e não deveria?</label>
+          <textarea data-campo="automacao"></textarea>
+        </div>
+      </section>
+
+      <!-- 4. Dores e consequências -->
+      <section class="form-section">
+        <h2>4. Dores e consequências</h2>
+        <div class="linha">
+          <label>Último problema em auditoria, cliente ou análise</label>
+          <textarea data-campo="ultimoProblema"></textarea>
+        </div>
+        <div class="linha">
+          <label>Erros que custaram dinheiro, lote perdido ou retrabalho (coisas que aconteceram)</label>
+          <textarea data-campo="errosCusto"></textarea>
+        </div>
+        <div class="linha">
+          <label>Ranking de dores por tempo — o que mais consome tempo por semana</label>
+          <textarea data-campo="rankDores"></textarea>
+        </div>
+        <div class="linha">
+          <label>Outras dores observadas (livre)</label>
+          <textarea data-campo="outrasDores"></textarea>
+        </div>
+      </section>
+
+      <!-- 5. Dinheiro e decisão -->
+      <section class="form-section">
+        <h2>5. Dinheiro e decisão</h2>
+        <div class="grid-2">
+          <div class="linha">
+            <label>Pagam por algum sistema hoje?</label>
+            <select data-campo="pagaSistema">
+              <option value="">Selecione...</option>
+              <option value="Sim">Sim</option>
+              <option value="Não">Não</option>
+            </select>
+          </div>
+          <div class="linha">
+            <label>Quanto, mais ou menos?</label>
+            <input type="text" data-campo="quantoPaga">
+          </div>
+        </div>
+        <div class="linha">
+          <label>Quem decide comprar um sistema? Como é esse processo?</label>
+          <textarea data-campo="quemDecide"></textarea>
+        </div>
+        <div class="linha">
+          <label>Já tentaram implantar algum sistema e abandonaram? Por quê?</label>
+          <textarea data-campo="abandonou"></textarea>
+        </div>
+      </section>
+
+      <!-- 6. Rede e mercado -->
+      <section class="form-section">
+        <h2>6. Rede e mercado</h2>
+        <div class="linha">
+          <label>Quem mais tem esse problema? Conhece laboratórios que trabalham semelhante?</label>
+          <textarea data-campo="quemMaisProblema"></textarea>
+        </div>
+        <div class="linha">
+          <label>Pode apresentar 3 pessoas do setor para conversar 20 minutos?</label>
+          <textarea data-campo="apresentacoes"></textarea>
+        </div>
+        <div class="linha">
+          <label>Onde o pessoal do setor se informa (grupos, eventos, associações, sindicato…)?</label>
+          <textarea data-campo="canaisSetor"></textarea>
+        </div>
+      </section>
+
+      <!-- 7. Encerramento -->
+      <section class="form-section">
+        <h2>7. Encerramento</h2>
+        <div class="linha">
+          <label>Resumo do que foi falado</label>
+          <textarea data-campo="resumoConversa"></textarea>
+        </div>
+        <div class="linha">
+          <label>Se pudesse resolver uma única coisa amanhã, qual seria?</label>
+          <textarea data-campo="dorNumero1"></textarea>
+        </div>
+        <div class="linha">
+          <label>Permissão para enviar resumo e combinados</label>
+          <textarea data-campo="combinados"></textarea>
+        </div>
+      </section>
+
+      <!-- 8. Observações e análise -->
+      <section class="form-section">
+        <h2>8. Observações e análise</h2>
+        <div class="linha">
+          <label>Observações gerais</label>
+          <textarea data-campo="observacoesGerais"></textarea>
+        </div>
+        <div class="linha">
+          <label>Dores identificadas (resumo)</label>
+          <textarea data-campo="doresIdentificadas"></textarea>
+        </div>
+        <div class="linha">
+          <label>Hipóteses levantadas</label>
+          <textarea data-campo="hipoteses"></textarea>
+        </div>
+        <div class="linha">
+          <label>Próximos passos</label>
+          <textarea data-campo="proximosPassos"></textarea>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== MODO CAMPOS ===================== -->
+    <div id="painelCampos" class="aba-painel hidden">
+      <section class="form-section">
+        <h2>Selecione o campo para editar</h2>
+        <div class="linha">
+          <label>Incluir campos</label>
+          <select id="incluirCampos">
+            <option value="perguntas">Perguntas (30)</option>
+            <option value="bia">Bia (25)</option>
+            <option value="dores">Dores</option>
+            <option value="todos">Todos</option>
+            <option value="nenhum">Nenhum</option>
+          </select>
+          <small>Trocar aqui também muda as abas abaixo — tudo é salvo automaticamente.</small>
+        </div>
+
+        <div id="camposExtras">
+          <div class="sub-abas">
+            <button class="sub-aba ativa" data-sub="perguntas" type="button">Perguntas (30)</button>
+            <button class="sub-aba" data-sub="bia" type="button">Bia (25)</button>
+            <button class="sub-aba" data-sub="dores" type="button">Dores (Colunas)</button>
+          </div>
+
+          <!-- Perguntas (30) -->
+          <div class="sub-painel ativa" data-campo="perguntas">
+            <h3>Perguntas (30)</h3>
+            <small>Pergunte sobre o PASSADO (o que aconteceu), nunca sobre o futuro (o que faria).</small>
+
+            <h3>Contexto</h3>
+            <div class="linha"><label>1. Em que tipo de empresa/laboratório você trabalha e o que ele faz?</label><textarea data-campo="pergunta1"></textarea></div>
+            <div class="linha"><label>2. Quantas pessoas no lab? Quantas amostras/análises por semana?</label><textarea data-campo="pergunta2"></textarea></div>
+            <div class="linha"><label>3. Que sistemas ou ferramentas vocês usam hoje?</label><textarea data-campo="pergunta3"></textarea></div>
+
+            <h3>Dia a dia</h3>
+            <div class="linha"><label>4. Me conta o seu último dia de trabalho, do começo ao fim.</label><textarea data-campo="pergunta4"></textarea></div>
+            <div class="linha"><label>5. O que você precisou refazer ou digitar duas vezes nesta semana?</label><textarea data-campo="pergunta5"></textarea></div>
+            <div class="linha"><label>6. O que você perdeu tempo procurando?</label><textarea data-campo="pergunta6"></textarea></div>
+            <div class="linha"><label>7. O que ainda está em planilha, papel ou WhatsApp e não deveria?</label><textarea data-campo="pergunta7"></textarea></div>
+
+            <h3>Dores e consequências</h3>
+            <div class="linha"><label>8. Qual foi o último problema que apareceu numa auditoria, cliente ou análise?</label><textarea data-campo="pergunta8"></textarea></div>
+            <div class="linha"><label>9. Já houve um erro que custou dinheiro, lote perdido ou retrabalho grande?</label><textarea data-campo="pergunta9"></textarea></div>
+            <div class="linha"><label>10. O que mais consome o seu tempo por semana?</label><textarea data-campo="pergunta10"></textarea></div>
+
+            <h3>Dinheiro e decisão</h3>
+            <div class="linha"><label>11. Vocês já pagam por algum sistema? Quanto, mais ou menos?</label><textarea data-campo="pergunta11"></textarea></div>
+            <div class="linha"><label>12. Quem decide comprar um sistema ou ferramenta nova?</label><textarea data-campo="pergunta12"></textarea></div>
+            <div class="linha"><label>13. Já tentaram implantar algum sistema e abandonaram? Por quê?</label><textarea data-campo="pergunta13"></textarea></div>
+
+            <h3>Rede e mercado</h3>
+            <div class="linha"><label>14. Quem mais tem esse problema? Conhece laboratórios pequenos semelhantes?</label><textarea data-campo="pergunta14"></textarea></div>
+            <div class="linha"><label>15. Você consegue me apresentar 3 pessoas do setor?</label><textarea data-campo="pergunta15"></textarea></div>
+            <div class="linha"><label>16. Onde o pessoal do setor se informa?</label><textarea data-campo="pergunta16"></textarea></div>
+
+            <h3>Fechamento</h3>
+            <div class="linha"><label>17. Se você pudesse resolver uma única coisa amanhã, qual seria?</label><textarea data-campo="pergunta17"></textarea></div>
+            <div class="linha"><label>18. Posso te mandar um resumo do que anotei para você corrigir?</label><textarea data-campo="pergunta18"></textarea></div>
+
+            <h3>Experiência com sistemas</h3>
+            <div class="linha"><label>19. Qual foi o último sistema/ferramenta que tentaram usar?</label><textarea data-campo="pergunta19"></textarea></div>
+            <div class="linha"><label>20. O que funcionou e o que não funcionou?</label><textarea data-campo="pergunta20"></textarea></div>
+
+            <h3>Processo atual</h3>
+            <div class="linha"><label>21. Como vocês organizam as amostras/dados hoje?</label><textarea data-campo="pergunta21"></textarea></div>
+            <div class="linha"><label>22. Onde ficam os resultados/relatórios?</label><textarea data-campo="pergunta22"></textarea></div>
+            <div class="linha"><label>23. Quem precisa ver essas informações?</label><textarea data-campo="pergunta23"></textarea></div>
+            <div class="linha"><label>24. O que acontece quando alguém precisa de um dado antigo?</label><textarea data-campo="pergunta24"></textarea></div>
+
+            <h3>Dores específicas</h3>
+            <div class="linha"><label>25. Qual é a maior dor hoje?</label><textarea data-campo="pergunta25"></textarea></div>
+            <div class="linha"><label>26. O que te faz perder mais tempo?</label><textarea data-campo="pergunta26"></textarea></div>
+            <div class="linha"><label>27. O que te causa mais estresse?</label><textarea data-campo="pergunta27"></textarea></div>
+
+            <h3>Decisão</h3>
+            <div class="linha"><label>28. O que faria vocês mudarem de sistema?</label><textarea data-campo="pergunta28"></textarea></div>
+            <div class="linha"><label>29. Quem mais participaria dessa decisão?</label><textarea data-campo="pergunta29"></textarea></div>
+
+            <h3>Validação</h3>
+            <div class="linha"><label>30. Posso te mostrar uma solução quando tiver?</label><textarea data-campo="pergunta30"></textarea></div>
+          </div>
+
+          <!-- Bia (25) -->
+          <div class="sub-painel hidden" data-campo="bia">
+            <h3>Bia (25)</h3>
+            <small>Questionário complementar — anote as respostas de cada bloco em ordem.</small>
+
+            <h3>Contexto</h3>
+            <div class="linha"><label>1. Nome</label><input type="text" data-campo="biaNome"></div>
+            <div class="linha"><label>2. Idade</label><input type="text" data-campo="biaIdade"></div>
+            <div class="linha"><label>3. Onde mora</label><input type="text" data-campo="biaOndeMora"></div>
+            <div class="linha"><label>4. Formação</label><input type="text" data-campo="biaFormacao"></div>
+            <div class="linha"><label>5. Há quanto tempo trabalha na área</label><input type="text" data-campo="biaTempoArea"></div>
+            <div class="linha"><label>6. Tamanho do laboratório (pessoas)</label><input type="text" data-campo="biaTamanhoLab"></div>
+            <div class="linha"><label>7. Nº de amostras/semana</label><input type="text" data-campo="biaAmostras"></div>
+
+            <h3>Trabalho</h3>
+            <div class="linha"><label>8. Rotina diária</label><textarea data-campo="biaRotina"></textarea></div>
+            <div class="linha"><label>9. Onde perde mais tempo</label><textarea data-campo="biaTempoPerdido"></textarea></div>
+            <div class="linha"><label>10. Onde erra mais</label><textarea data-campo="biaErros"></textarea></div>
+            <div class="linha"><label>11. Como lida com prazos</label><textarea data-campo="biaPrazos"></textarea></div>
+            <div class="linha"><label>12. Como lida com auditorias</label><textarea data-campo="biaAuditorias"></textarea></div>
+            <div class="linha"><label>13. Como lida com clientes</label><textarea data-campo="biaClientes"></textarea></div>
+
+            <h3>Ferramentas</h3>
+            <div class="linha"><label>14. O que usa hoje</label><textarea data-campo="biaFerramentas"></textarea></div>
+            <div class="linha"><label>15. O que falta</label><textarea data-campo="biaFalta"></textarea></div>
+            <div class="linha"><label>16. O que já testou</label><textarea data-campo="biaTestou"></textarea></div>
+            <div class="linha"><label>17. O que acha de automação</label><textarea data-campo="biaAutomacao"></textarea></div>
+
+            <h3>Dores</h3>
+            <div class="linha"><label>18. Dor principal</label><textarea data-campo="biaDorPrincipal"></textarea></div>
+            <div class="linha"><label>19. Dor secundária</label><textarea data-campo="biaDorSecundaria"></textarea></div>
+            <div class="linha"><label>20. Dor mais urgente</label><textarea data-campo="biaDorUrgente"></textarea></div>
+            <div class="linha"><label>21. Quem sente mais</label><textarea data-campo="biaQuemSente"></textarea></div>
+            <div class="linha"><label>22. Quem decide</label><textarea data-campo="biaQuemDecide"></textarea></div>
+
+            <h3>Decisão</h3>
+            <div class="linha"><label>23. O que faria mudar</label><textarea data-campo="biaMudar"></textarea></div>
+            <div class="linha"><label>24. Quanto pagaria</label><textarea data-campo="biaPagaria"></textarea></div>
+            <div class="linha"><label>25. Próximo passo</label><textarea data-campo="biaProximoPasso"></textarea></div>
+          </div>
+
+          <!-- Dores (Colunas) -->
+          <div class="sub-painel hidden" data-campo="dores">
+            <h3>Dores (Colunas)</h3>
+            <small>Uma linha por dor — nas palavras dele. Depois, transfira as mais fortes para a aba Ideias.</small>
+            <div class="linha"><label>1. Dor / situação (nas palavras dele)</label><textarea data-campo="doresSituacao"></textarea></div>
+            <div class="linha"><label>2. Com que frequência</label><input type="text" data-campo="doresFrequencia" placeholder="ex.: Semanal, Diária, Mensal"></div>
+            <div class="linha"><label>3. Tempo ou dinheiro perdido</label><input type="text" data-campo="doresTempo" placeholder="ex.: ~4 h/semana"></div>
+            <div class="linha"><label>4. Como resolvem hoje</label><textarea data-campo="doresResolvem"></textarea></div>
+            <div class="linha"><label>5. Quem sofre com isso</label><input type="text" data-campo="doresQuemSofre"></div>
+            <div class="linha"><label>6. Quem paga / decide</label><input type="text" data-campo="doresQuemPaga"></div>
+            <div class="linha"><label>7. Ideia relacionada (nº na aba Ideias)</label><input type="text" data-campo="doresIdeia"></div>
+            <div class="linha">
+              <label>8. Força da dor (1–5)</label>
+              <select data-campo="doresForca">
+                <option value="">Selecione...</option>
+                <option value="1">1 — incômodo leve</option>
+                <option value="2">2 — incômodo moderado</option>
+                <option value="3">3 — dor relevante</option>
+                <option value="4">4 — dor forte</option>
+                <option value="5">5 — dor crítica / urgente</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      Formulário offline — os dados ficam salvos apenas neste navegador (localStorage) até você baixar o backup ou exportar.
+    </footer>
+  </div>
+
+  <div class="progresso" id="progresso">
+    <div>Salvando alterações...</div>
+    <div class="bar"><div id="progressoBar"></div></div>
+  </div>
+
+  <script>
+    // ===== Estado e persistência =====
+    const STORAGE_KEY = 'omena_pesquisa_form';
+    let saveTimeout = null;
+    let abaAtual = 'seccoes';
+
+    function getAllFields(){
+      return Array.from(document.querySelectorAll('[data-campo]'))
+        .filter(el => el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA');
+    }
+
+    function salvarTudo(){
+      const dados = {};
+      getAllFields().forEach(el => {
+        dados[el.dataset.campo] = el.value;
+      });
+      dados.incluirCampos = document.getElementById('incluirCampos')?.value || 'perguntas';
+      dados.abaAtual = abaAtual;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+      atualizarStatus();
+    }
+
+    function agendarSalvar(){
+      clearTimeout(saveTimeout);
+      mostrarProgresso();
+      saveTimeout = setTimeout(() => {
+        salvarTudo();
+        esconderProgresso();
+      }, 800);
+    }
+
+    function carregarDados(){
+      try {
+        const dados = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        getAllFields().forEach(el => {
+          if (dados[el.dataset.campo] !== undefined) {
+            el.value = dados[el.dataset.campo];
+          }
+        });
+        if (dados.incluirCampos) {
+          const sel = document.getElementById('incluirCampos');
+          if (sel) sel.value = dados.incluirCampos;
+        }
+        if (dados.abaAtual) {
+          abaAtual = dados.abaAtual;
+        }
+      } catch (e) {
+        console.warn('Erro ao carregar dados:', e);
+      }
+    }
+
+    function limparDados(){
+      if (!confirm('Limpar TODOS os dados salvos neste navegador?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+
+    function exportarJSON(){
+      const dados = {};
+      getAllFields().forEach(el => {
+        dados[el.dataset.campo] = el.value;
+      });
+      const blob = new Blob([JSON.stringify(dados, null, 2)], {type: 'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'omena_form_backup.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // ===== UI =====
+    function atualizarStatus(){
+      const status = document.getElementById('status');
+      if (!status) return;
+      const agora = new Date().toLocaleTimeString('pt-BR');
+      status.textContent = 'Salvo automaticamente às ' + agora + '.';
+    }
+
+    function mostrarProgresso(){
+      const prog = document.getElementById('progresso');
+      const bar = document.getElementById('progressoBar');
+      if (!prog || !bar) return;
+      prog.style.display = 'block';
+      bar.style.width = '0';
+      setTimeout(() => { bar.style.width = '100%'; }, 10);
+    }
+
+    function esconderProgresso(){
+      const prog = document.getElementById('progresso');
+      if (!prog) return;
+      setTimeout(() => { prog.style.display = 'none'; }, 300);
+    }
+
+    function mostrarToast(msg, tipo){
+      const toast = document.createElement('div');
+      toast.className = 'toast show ' + (tipo || 'ok');
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    // ===== Abas principais =====
+    function setAba(aba){
+      document.querySelectorAll('.aba').forEach(b => b.classList.toggle('ativa', b.dataset.aba === aba));
+      const seccoes = document.getElementById('painelSeccoes');
+      const campos = document.getElementById('painelCampos');
+      if (seccoes){
+        seccoes.classList.toggle('ativa', aba === 'seccoes');
+        seccoes.classList.toggle('hidden', aba !== 'seccoes');
+      }
+      if (campos){
+        campos.classList.toggle('ativa', aba === 'campos');
+        campos.classList.toggle('hidden', aba !== 'campos');
+      }
+      abaAtual = aba;
+      mostrarCamposExtras();
+      salvarTudo();
+    }
+
+    // ===== Sub-abas (Perguntas / Bia / Dores) =====
+    function setSubaba(sub){
+      document.querySelectorAll('.sub-aba').forEach(b => b.classList.toggle('ativa', b.dataset.sub === sub));
+      document.querySelectorAll('#camposExtras .sub-painel').forEach(p => {
+        p.classList.toggle('ativa', p.dataset.campo === sub);
+        p.classList.toggle('hidden', p.dataset.campo !== sub);
+      });
+      // mantém o select "Incluir campos" sincronizado com a aba aberta
+      const sel = document.getElementById('incluirCampos');
+      if (sel && Array.from(sel.options).some(o => o.value === sub)) {
+        sel.value = sub;
+      }
+      salvarTudo();
+    }
+
+    function mostrarCamposExtras(){
+      const camposExtras = document.getElementById('camposExtras');
+      if (!camposExtras) return;
+      const modo = document.getElementById('incluirCampos')?.value || 'perguntas';
+      const mostrarTodos = modo === 'todos';
+      const esconderTudo = modo === 'nenhum';
+      camposExtras.querySelectorAll('.sub-painel').forEach(p => {
+        const mostrar = !esconderTudo && (mostrarTodos || p.dataset.campo === modo);
+        p.classList.toggle('ativa', mostrar);
+        p.classList.toggle('hidden', !mostrar);
+      });
+      // sincroniza os botões das sub-abas com a seleção
+      document.querySelectorAll('#camposExtras .sub-aba').forEach(b => {
+        b.classList.toggle('ativa', !mostrarTodos && !esconderTudo && b.dataset.sub === modo);
+      });
+    }
+
+    // ===== Init =====
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarDados();
+
+      // datas vazias
+      document.querySelectorAll('input[type="date"]').forEach(el => {
+        el.addEventListener('change', () => {
+          el.classList.toggle('vazio', !el.value);
+        });
+        el.classList.toggle('vazio', !el.value);
+      });
+
+      // abas principais
+      document.querySelectorAll('.aba').forEach(b => {
+        b.addEventListener('click', () => setAba(b.dataset.aba));
+      });
+      setAba(abaAtual);
+
+      // sub-abas — inicia na salva ou em "perguntas"
+      const sel = document.getElementById('incluirCampos');
+      const subInicial = (sel && ['perguntas','bia','dores'].includes(sel.value)) ? sel.value : 'perguntas';
+      document.querySelectorAll('.sub-aba').forEach(b => {
+        b.addEventListener('click', () => setSubaba(b.dataset.sub));
+      });
+      setSubaba(subInicial);
+
+      // select "Incluir campos"
+      if (sel) {
+        sel.addEventListener('change', mostrarCamposExtras);
+      }
+
+      // autosave
+      getAllFields().forEach(el => {
+        el.addEventListener('input', agendarSalvar);
+        el.addEventListener('change', agendarSalvar);
+      });
+
+      // botões
+      document.getElementById('btnSalvar')?.addEventListener('click', () => {
+        salvarTudo();
+        mostrarToast('Dados salvos neste navegador.', 'ok');
+      });
+      document.getElementById('btnExportar')?.addEventListener('click', exportarJSON);
+      document.getElementById('btnLimpar')?.addEventListener('click', limparDados);
+
+      window.addEventListener('beforeunload', salvarTudo);
+    });
+  </script>
+</body>
+</html>
