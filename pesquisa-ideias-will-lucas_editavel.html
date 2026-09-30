@@ -1,0 +1,2926 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Pesquisa de ideias — Will &amp; Lucas (versão editável)</title>
+<meta name="description" content="Planilha interativa de pesquisa de ideias: pontuação com ranking automático, dores do Lucas, matriz de validação, plano de ação e registro de entrevistas. Funciona offline; os dados ficam no seu navegador.">
+<style>
+/* ==========================================================================
+   Pesquisa de ideias — Will & Lucas (versão editável)
+   Convenção visual herdada da planilha:
+     amarelo + texto azul  = campo para preencher
+     cinza itálico         = exemplo (não conta)
+     cinza claro em negrito= calculado automaticamente
+     branco                = texto fixo
+   ========================================================================== */
+:root {
+  --navy: #1f3864;
+  --navy-dark: #162847;
+  --blue: #2563eb;
+  --blue-soft: #dbeafe;
+  --ink: #111827;
+  --muted: #6b7280;
+  --line: #d3d8e0;
+  --line-soft: #e8ebf0;
+  --bg: #f3f5f9;
+  --card: #ffffff;
+  --in-bg: #fff2cc;
+  --in-bg-hover: #ffeeb8;
+  --in-bg-focus: #ffe7a0;
+  --in-fg: #0a2fc4;
+  --ex-bg: #ededed;
+  --ex-fg: #7f7f7f;
+  --calc-bg: #f0f2f6;
+  --warn-bg: #fef3c7;
+  --warn-fg: #92400e;
+  --ok-bg: #dcfce7;
+  --ok-fg: #166534;
+  --bad-bg: #fee2e2;
+  --bad-fg: #991b1b;
+  --info-bg: #eff6ff;
+  --info-fg: #1e3a8a;
+  --radius: 10px;
+  --topbar-h: 56px;
+  --sticky-h: 104px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+[hidden] { display: none !important; }
+a { color: var(--blue); }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* ---------------------------------------------------------------- topo */
+.topbar {
+  position: sticky; top: 0; z-index: 60;
+  background: var(--navy); color: #fff;
+  display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap;
+  padding: 8px 16px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.08) inset;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; flex: 1 1 280px; }
+.brand h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: .1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand .tag { font-size: 11px; font-weight: 600; background: rgba(255,255,255,.16); padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.save-status { font-size: 12px; opacity: .92; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.save-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; }
+.save-status.saving .dot { background: #fbbf24; }
+.save-status.error .dot { background: #f87171; }
+.save-status.error { opacity: 1; color: #fecaca; }
+
+.btn {
+  appearance: none; border: 1px solid transparent; border-radius: 8px;
+  padding: 7px 12px; cursor: pointer; font-weight: 600; font-size: 13px; line-height: 1.2;
+  background: #fff; color: var(--navy); white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { filter: brightness(.96); }
+.btn:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+.btn.primary { background: var(--blue); color: #fff; }
+.btn.ghost { background: transparent; color: inherit; border-color: rgba(255,255,255,.4); }
+.topbar .btn.ghost:hover { background: rgba(255,255,255,.12); filter: none; }
+.btn.line { background: #fff; border-color: var(--line); color: var(--navy); }
+.btn.danger { background: #fff; border-color: #fca5a5; color: #b91c1c; }
+.btn.small { padding: 4px 8px; font-size: 12px; border-radius: 6px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.btn .pip { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block; }
+
+.menu { position: relative; }
+.menu > summary { list-style: none; cursor: pointer; }
+.menu > summary::-webkit-details-marker { display: none; }
+.menu .menu-list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 80; min-width: 230px; max-width: calc(100vw - 20px);
+  background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, .18); padding: 6px; display: flex; flex-direction: column;
+}
+.menu .menu-list button {
+  text-align: left; border: 0; background: transparent; padding: 9px 10px; border-radius: 7px; cursor: pointer; font-size: 13px;
+}
+.menu .menu-list button:hover { background: #f3f4f6; }
+.menu .menu-list button.danger { color: #b91c1c; }
+.menu .menu-list hr { border: 0; border-top: 1px solid var(--line-soft); margin: 4px 0; width: 100%; }
+
+/* ---------------------------------------------------------------- abas */
+.tabs {
+  position: sticky; top: var(--topbar-h); z-index: 50;
+  background: #fff; border-bottom: 1px solid var(--line);
+  display: flex; overflow-x: auto; gap: 2px; padding: 0 10px;
+  scrollbar-width: thin;
+}
+.tab {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  padding: 11px 13px 9px; color: var(--muted); font-size: 13px; white-space: nowrap;
+  border-bottom: 3px solid transparent; display: inline-flex; align-items: center; gap: 6px;
+}
+.tab:hover { color: var(--navy); background: #f8fafc; }
+.tab[aria-selected="true"] { color: var(--navy); font-weight: 700; border-bottom-color: var(--blue); }
+.tab:focus-visible { outline: 3px solid #93c5fd; outline-offset: -3px; }
+.tab .new { font-size: 10px; font-weight: 700; background: #dcfce7; color: #166534; border-radius: 99px; padding: 1px 6px; }
+
+/* ---------------------------------------------------------------- painel */
+.panel { max-width: 1760px; margin: 0 auto; padding: 14px 16px 60px; }
+.panel h2 { margin: 6px 0 2px; font-size: 20px; color: var(--navy); }
+.panel h3 { margin: 18px 0 6px; font-size: 15px; color: var(--navy); }
+.lead { margin: 2px 0 10px; color: var(--muted); font-size: 13px; }
+
+.callout { border-radius: 8px; padding: 10px 14px; margin: 10px 0; font-size: 13px; line-height: 1.5; }
+.callout.warn { background: var(--warn-bg); color: var(--warn-fg); font-style: italic; }
+.callout.info { background: var(--info-bg); color: var(--info-fg); }
+.callout.neutral { background: #f8fafc; border: 1px solid var(--line-soft); color: #374151; }
+.callout b { font-style: normal; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 12px; color: var(--muted); margin: 6px 0 2px; }
+.legend .sw { display: inline-block; width: 26px; height: 16px; border-radius: 4px; border: 1px solid var(--line); vertical-align: -3px; margin-right: 5px; }
+.legend .sw.in { background: var(--in-bg); color: var(--in-fg); font-size: 10px; font-weight: 700; text-align: center; line-height: 14px; }
+.legend .sw.ex { background: var(--ex-bg); }
+.legend .sw.calc { background: var(--calc-bg); }
+.legend .sw.fix { background: #fff; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 10px 0; }
+.toolbar .grow { flex: 1 1 auto; }
+.toolbar label.inline { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
+.toolbar input[type="number"], .toolbar input[type="date"], .toolbar input[type="text"] {
+  border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; background: var(--in-bg); color: var(--in-fg); font-weight: 600; width: 92px;
+}
+.toolbar input[type="date"] { width: 150px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.chip { background: #fff; border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; font-size: 12px; color: #374151; }
+.chip b { color: var(--navy); font-size: 13px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 12px 0; }
+.kpi { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 14px; }
+.kpi .n { font-size: 24px; font-weight: 800; color: var(--navy); line-height: 1.1; }
+.kpi .t { font-size: 12px; color: var(--muted); }
+.kpi .bar { height: 5px; border-radius: 3px; background: var(--line-soft); margin-top: 7px; overflow: hidden; }
+.kpi .bar > i { display: block; height: 100%; background: var(--blue); }
+
+/* ---------------------------------------------------------------- tabela estilo planilha */
+.tablewrap {
+  overflow: auto; background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+  max-height: calc(100vh - var(--sticky-h) - 18px);
+  margin: 8px 0 14px; position: relative;
+}
+table.sheet { border-collapse: separate; border-spacing: 0; table-layout: fixed; min-width: 100%; font-size: 13px; }
+.sheet th, .sheet td {
+  border-right: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft);
+  padding: 0; vertical-align: top; background: #fff; text-align: left;
+}
+.sheet th:last-child, .sheet td:last-child { border-right: 0; }
+.sheet thead th {
+  position: sticky; top: 0; z-index: 4; background: var(--navy); color: #fff;
+  padding: 8px 8px; font-size: 12px; font-weight: 700; line-height: 1.25; vertical-align: middle;
+  border-right-color: rgba(255,255,255,.18); border-bottom: 0;
+}
+.sheet thead th.c { text-align: center; }
+.sheet thead th[title] { cursor: help; }
+.sheet td.fx { padding: 7px 9px; }
+.sheet td.c, .sheet td.num { text-align: center; }
+.sheet td.fx.small { font-size: 12px; color: #374151; }
+.sheet td.id { text-align: center; font-weight: 700; color: var(--navy); padding: 7px 4px; }
+.sheet td.calc { background: var(--calc-bg); font-weight: 700; text-align: center; padding: 7px 6px; vertical-align: middle; }
+.sheet td.in { background: var(--in-bg); color: var(--in-fg); padding: 0; }
+.sheet td.in:hover { background: var(--in-bg-hover); }
+.sheet td.in:focus-within { background: var(--in-bg-focus); box-shadow: inset 0 0 0 2px var(--blue); }
+.sheet td.in > input, .sheet td.in > textarea, .sheet td.in > select, .sheet td.in .cellfield {
+  display: block; width: 100%; border: 0; background: transparent; color: var(--in-fg);
+  padding: 7px 9px; margin: 0; border-radius: 0; outline: none; font-size: 13px; line-height: 1.4;
+}
+.sheet td.in > textarea { resize: none; overflow: hidden; min-height: 34px; display: block; }
+.sheet td.in > select { cursor: pointer; padding-right: 2px; }
+.sheet td.in > input::placeholder, .sheet td.in > textarea::placeholder { color: rgba(10, 47, 196, .36); font-style: italic; }
+.sheet td.in.score > input { text-align: center; font-weight: 700; font-size: 15px; padding: 8px 2px; }
+.sheet td.in.bad { background: #fecaca !important; }
+.sheet tr.example td { background: var(--ex-bg) !important; color: var(--ex-fg); font-style: italic; }
+.sheet tr.example td.calc { background: #e3e3e3 !important; }
+.sheet tr.weights td { background: #fff8e1; border-bottom: 2px solid var(--line); }
+.sheet tr.weights td.lab { text-align: right; font-weight: 700; color: var(--navy); padding: 8px 10px; vertical-align: middle; background: #fff; }
+.sheet tr.weights td.note { color: var(--muted); font-style: italic; font-size: 12px; padding: 8px 8px; vertical-align: middle; background: #fff; }
+.sheet tr.detail > td { background: #fafbfd; padding: 12px 14px 14px; }
+.sheet tr:hover > td.fx, .sheet tr:hover > td.id { background: #fbfcfe; }
+.sheet tr.example:hover > td { background: var(--ex-bg) !important; }
+
+.sticky-l { position: sticky; z-index: 3; }
+.sheet thead th.sticky-l { z-index: 6; }
+.sheet td.sticky-l { background: #fff; }
+.sheet tr:hover > td.sticky-l { background: #fbfcfe; }
+.sheet tr.example td.sticky-l { background: var(--ex-bg) !important; }
+.sheet tr.weights td.sticky-l { background: #fff; }
+.sticky-edge { box-shadow: 2px 0 0 var(--line); }
+
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; line-height: 1.5; white-space: nowrap;
+}
+.badge.ok { background: var(--ok-bg); color: var(--ok-fg); }
+.badge.bad { background: var(--bad-bg); color: var(--bad-fg); }
+.badge.warn { background: var(--warn-bg); color: var(--warn-fg); }
+.badge.gray { background: #e5e7eb; color: #374151; }
+.badge.blue { background: var(--blue-soft); color: #1e40af; }
+
+.prio-first { background: #dcfce7 !important; }
+.prio-later { background: #fef3c7 !important; }
+.prio-low { background: #fee2e2 !important; }
+.prio-drop { background: #e5e7eb !important; }
+.st-pend { background: #f3f4f6 !important; }
+.st-prep { background: #e0f2fe !important; }
+.st-run { background: #fef3c7 !important; }
+.st-done { background: #dcfce7 !important; }
+.st-pause { background: #ede9fe !important; }
+.st-drop { background: #fee2e2 !important; }
+
+.cell-actions { display: flex; flex-direction: column; gap: 4px; padding: 6px; align-items: stretch; }
+.cell-actions .btn { justify-content: center; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; background: #d1d5db; vertical-align: 0; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.nowrap { white-space: nowrap; }
+.r { text-align: right; }
+.link { color: var(--blue); text-decoration: underline; word-break: break-all; }
+
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px 14px; }
+.field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.field > label, .field > .lbl { font-size: 11px; font-weight: 700; color: var(--navy); text-transform: none; letter-spacing: .1px; }
+.field > .hint { font-size: 11px; color: var(--muted); }
+.field .ctl {
+  background: var(--in-bg); color: var(--in-fg); border: 1px solid #f0dc9b; border-radius: 6px; padding: 7px 9px; width: 100%;
+  font-size: 13px; line-height: 1.4; resize: none; overflow: hidden; min-height: 34px;
+}
+.field .ctl:hover { background: var(--in-bg-hover); }
+.field .ctl:focus { background: var(--in-bg-focus); outline: 2px solid var(--blue); outline-offset: 0; }
+.field select.ctl { cursor: pointer; }
+.field .ctl::placeholder { color: rgba(10, 47, 196, .36); font-style: italic; }
+
+/* ---------------------------------------------------------------- fichas (registro de entrevistas) */
+.card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); margin: 12px 0; overflow: hidden; }
+.card > .card-h { display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: #f8fafc; border-bottom: 1px solid var(--line-soft); cursor: pointer; flex-wrap: wrap; }
+.card > .card-h .ttl { font-weight: 700; color: var(--navy); flex: 1 1 240px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card > .card-b { padding: 14px; }
+.card.collapsed > .card-b { display: none; }
+.card .sec { margin: 14px 0 6px; font-size: 12px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--line-soft); padding-bottom: 3px; }
+.card .sec:first-child { margin-top: 0; }
+
+/* ---------------------------------------------------------------- texto corrido (Como usar / leitura executiva) */
+.prose { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 22px 18px; max-width: 980px; }
+.prose h3 { margin: 18px 0 6px; font-size: 13px; letter-spacing: .6px; color: var(--navy); text-transform: uppercase; }
+.prose p, .prose li { margin: 4px 0; }
+.prose ul { padding-left: 20px; margin: 4px 0 8px; }
+.prose .h1 { font-size: 20px; font-weight: 800; color: var(--navy); margin: 14px 0 4px; }
+.prose code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+.prose details { margin: 10px 0; }
+.prose summary { cursor: pointer; font-weight: 700; color: var(--navy); }
+.prose kbd { background: #f3f4f6; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 12px; }
+.exec-list { list-style: none; padding: 0; margin: 6px 0; }
+.exec-list li { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--blue); border-radius: 8px; padding: 9px 14px; margin: 8px 0; }
+
+/* ---------------------------------------------------------------- toasts e diálogo */
+#toasts { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; align-items: center; width: min(92vw, 560px); pointer-events: none; }
+.toast { pointer-events: auto; background: #111827; color: #fff; border-radius: 10px; padding: 10px 14px; box-shadow: 0 10px 28px rgba(0,0,0,.28); font-size: 13px; display: flex; align-items: center; gap: 12px; max-width: 100%; animation: tin .18s ease-out; }
+.toast.err { background: #991b1b; }
+.toast.ok { background: #14532d; }
+.toast button { background: transparent; border: 1px solid rgba(255,255,255,.5); color: #fff; border-radius: 6px; padding: 3px 9px; cursor: pointer; font-weight: 700; font-size: 12px; white-space: nowrap; }
+@keyframes tin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+dialog.dlg { border: 0; border-radius: 14px; padding: 0; max-width: min(92vw, 480px); width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,.35); color: var(--ink); }
+dialog.dlg::backdrop { background: rgba(15, 23, 42, .5); }
+dialog.dlg .dlg-b { padding: 20px 22px 8px; }
+dialog.dlg h4 { margin: 0 0 8px; font-size: 17px; color: var(--navy); }
+dialog.dlg p { margin: 0 0 8px; color: #374151; }
+dialog.dlg .dlg-f { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 22px 18px; flex-wrap: wrap; }
+
+/* ---------------------------------------------------------------- celular: tabelas viram cartões */
+@media (max-width: 860px) {
+  :root { --sticky-h: 112px; }
+  .panel { padding: 10px 10px 70px; }
+  .brand h1 { font-size: 15px; white-space: normal; }
+  .tablewrap:not(.nocard) { max-height: none; overflow: visible; border: 0; background: transparent; }
+  .tablewrap.nocard { max-height: none; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.sheet:not(.nocard) { display: block; width: auto !important; min-width: 0; table-layout: auto; }
+  table.sheet:not(.nocard) colgroup, table.sheet:not(.nocard) thead { display: none; }
+  table.sheet:not(.nocard) tbody { display: block; }
+  table.sheet:not(.nocard) tr { display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; margin: 0 0 12px; overflow: hidden; }
+  table.sheet:not(.nocard) td, table.sheet:not(.nocard) th {
+    display: block; width: auto !important; border-right: 0; text-align: left; position: static !important; box-shadow: none !important;
+  }
+  table.sheet:not(.nocard) td[data-label]::before {
+    content: attr(data-label); display: block; font-size: 10.5px; font-weight: 800; color: var(--navy);
+    padding: 7px 10px 0; letter-spacing: .2px;
+  }
+  table.sheet:not(.nocard) td.in[data-label]::before { padding-bottom: 0; }
+  table.sheet:not(.nocard) td.fx { padding-top: 0; padding-bottom: 7px; }
+  table.sheet:not(.nocard) td.fx[data-label]::before { padding-left: 0; padding-right: 0; }
+  table.sheet:not(.nocard) td.id, table.sheet:not(.nocard) td.c, table.sheet:not(.nocard) td.calc { text-align: left; }
+  table.sheet:not(.nocard) td.score[data-short] { display: inline-block; width: 25% !important; vertical-align: top; border-bottom: 1px solid var(--line-soft); }
+  table.sheet:not(.nocard) td.score[data-short]::before { content: attr(data-short); text-align: center; padding: 6px 2px 0; }
+  table.sheet:not(.nocard) td.hide-m { display: none; }
+  table.sheet:not(.nocard) tr.weights { display: flex; flex-wrap: wrap; }
+  table.sheet:not(.nocard) tr.weights td { width: 25% !important; display: block; }
+  table.sheet:not(.nocard) tr.weights td.lab, table.sheet:not(.nocard) tr.weights td.note { width: 100% !important; text-align: left; }
+  table.sheet:not(.nocard) tr.detail { border-style: dashed; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .toolbar input[type="date"] { width: 100%; }
+}
+
+/* ---------------------------------------------------------------- impressão */
+@media print {
+  :root { --sticky-h: 0px; }
+  body { background: #fff; font-size: 11px; }
+  .topbar, .tabs, #toasts, .no-print, .cell-actions, .toolbar .btn, .legend { display: none !important; }
+  .panel { max-width: none; padding: 0; }
+  .tablewrap { max-height: none !important; overflow: visible !important; border: 0; }
+  table.sheet { table-layout: auto; min-width: 0; width: 100% !important; font-size: 10px; }
+  .sheet thead th { position: static; }
+  .sheet th, .sheet td { position: static !important; }
+  .sheet td.in, .sheet .field .ctl { background: #fffbe6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sheet thead th { background: var(--navy) !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sheet tr { break-inside: avoid; }
+  .card.collapsed > .card-b { display: block; }
+}
+
+/* ---------------------------------------------------------------- ajustes finais */
+.btn.dangerfill { background: #b91c1c; color: #fff; }
+.menu > summary::after { content: ""; display: inline-block; border: 4px solid transparent; border-top-color: currentColor; margin: 4px 0 0 2px; }
+.sheet td.in.sticky-l, .sheet tr:hover > td.in.sticky-l { background: var(--in-bg); }
+.sheet td.in.sticky-l:hover, .sheet tr:hover > td.in.sticky-l:hover { background: var(--in-bg-hover); }
+.sheet td.in.sticky-l:focus-within, .sheet tr:hover > td.in.sticky-l:focus-within { background: var(--in-bg-focus); }
+.sheet tr.blockstart > td { border-top: 2px solid var(--line); }
+.sheet tr.blockstart:first-child > td { border-top: 0; }
+.detail-inner { position: sticky; left: 12px; width: min(1040px, calc(100vw - 80px)); }
+.toolbar label.inline input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); }
+.tablewrap:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+@media (max-width: 860px) {
+  .detail-inner { position: static; width: auto; }
+  .topbar { padding: 8px 10px; position: static; }
+  .tabs { top: 0; }
+  .actions { width: 100%; }
+}
+@media print {
+  .detail-inner { position: static; width: auto; }
+  .menu, #notices { display: none !important; }
+}
+
+.cell-actions { flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: flex-start; padding: 6px 8px; }
+.cell-actions .btn { padding: 4px 8px; }
+.sheet td.in.score { vertical-align: middle; }
+.sheet td.in { cursor: text; }
+.sheet td.in > select, .sheet td.in > select option { cursor: pointer; }
+@media (max-width: 860px) { .cell-actions { flex-wrap: wrap; } .sheet td.in.score { vertical-align: top; } }
+
+.sheet thead th { overflow-wrap: anywhere; }
+
+/* barra de progresso compacta dentro de um chip */
+.minibar { display: inline-block; width: 72px; height: 5px; border-radius: 3px; background: var(--line); margin-left: 8px; vertical-align: middle; overflow: hidden; }
+.minibar > i { display: block; height: 100%; background: var(--blue); width: 0; transition: width .2s; }
+@media print { .minibar { display: none; } }
+
+/* impressão: placeholders (dicas em cinza-claro) não devem sair no papel */
+@media print { input::placeholder, textarea::placeholder { color: transparent !important; } }
+/* cartões no celular: o número (#) alinha com os rótulos */
+@media (max-width: 860px) { table.sheet:not(.nocard) td.id { padding: 0 10px 8px; } }
+
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar" id="topbar"></header>
+  <nav class="tabs" id="tabs"></nav>
+  <div id="notices"></div>
+  <main class="panel" id="panel"></main>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<noscript><p style="margin:24px;font:16px system-ui">Esta planilha interativa precisa de JavaScript ativado no navegador.</p></noscript>
+<script type="application/json" id="seed-data">{"ideias":{"title":"Pontuação das ideias","subtitle":"Notas de 1 a 5 (5 = melhor para vocês). Amarelo = preencher. A nota final aparece quando os 7 critérios estão preenchidos.","weights":[3,3,2,1,1,2,2],"criteria":["Dor real e frequente","Já gastam tempo/dinheiro com isso","Mercado acessível (nº de clientes + acesso)","Pouca concorrência","Pouca regulação / risco","MVP rápido de fazer","Receita recorrente"],"headers":["#","Área","Ideia","Dor real e frequente","Já gastam tempo/dinheiro com isso","Mercado acessível (nº de clientes + acesso)","Pouca concorrência","Pouca regulação / risco","MVP rápido de fazer","Receita recorrente","Nota final (1–5)","Ranking","Observações / fonte da nota"],"example":["—","EXEMPLO","Exemplo (não conta no ranking): sistema fictício X",4,3,3,2,3,4,5,"=IF(AND(COUNT(D5:J5)=7,$K$3>0),SUMPRODUCT(D5:J5,$D$3:$J$3)/$K$3,\"\")","—","Linha de exemplo do formato esperado"],"base":[{"id":1,"area":"Lab / Química","name":"Controle de reagentes e estoque (validades, alertas, FISPQ, etiquetas com QR code)","short":"Controle de reagentes e estoque"},{"id":2,"area":"Lab / Química","name":"Rastreio de amostras: recebimento → análise → laudo, com histórico completo","short":"Rastreio de amostras"},{"id":3,"area":"Lab / Química","name":"Emissão automática de laudos e certificados de análise a partir dos resultados","short":"Emissão automática de laudos/COAs"},{"id":4,"area":"Lab / Química","name":"Gestão de equipamentos: calibração, manutenção e verificação, com agenda e alertas","short":"Gestão de equipamentos"},{"id":5,"area":"Lab / Química","name":"Gestão da qualidade: POPs, treinamentos, não conformidades e auditorias","short":"Gestão da qualidade"},{"id":6,"area":"Lab / Química","name":"Controle estatístico e incerteza de medição (labs acreditados)","short":"CEP e incerteza de medição"},{"id":7,"area":"Lab / Química","name":"Resíduos químicos e produtos controlados: conformidade e documentação obrigatória","short":"Resíduos químicos e produtos controlados"},{"id":8,"area":"Lab / Química","name":"Captura automática de dados de instrumentos (balança, pHmetro etc.), sem redigitar","short":"Captura automática de dados de instrumentos"},{"id":9,"area":"Lab / Química","name":"Portal do cliente para labs prestadores: solicitar análise, acompanhar, baixar laudo","short":"Portal do cliente para laboratórios"},{"id":10,"area":"Lab / Química","name":"Gestão de formulações para pequenas indústrias (versões de receita, custo, ficha técnica)","short":"Gestão de formulações industriais"},{"id":11,"area":"IA","name":"Assistente que responde perguntas sobre o manual de qualidade e os POPs da empresa","short":"Assistente para manuais/POPs"},{"id":12,"area":"IA","name":"Leitura automática de laudos de fornecedores em PDF, com conferência e alertas","short":"Leitura de laudos de fornecedores em PDF"},{"id":13,"area":"QA (experiência do Will)","name":"Validação de sistemas computadorizados e testes automatizados como serviço","short":"CSV / validação de sistemas e QA automation"},{"id":14,"area":"Cannabis","name":"Gestão para associações: pacientes, produção, rastreabilidade e prestação de contas","short":"Gestão para associações de cannabis"},{"id":15,"area":"Cannabis","name":"Análise de canabinoides e controle de qualidade como serviço","short":"Análise de canabinoides / controle de qualidade"},{"id":16,"area":"Pequenos negócios","name":"Sistema com WhatsApp e agendamento (pet shops, tabacarias, clínicas)","short":"WhatsApp e agendamento"}],"free":[{"id":17,"area":"Nova ideia","name":null},{"id":18,"area":"Nova ideia","name":null}]},"criterios":{"title":"O que significa cada nota","headers":["Critério","Pergunta-chave","Nota 1 significa","Nota 5 significa"],"rows":[["Dor real e frequente","Isso incomoda de verdade e acontece com frequência?","Incômodo raro; as pessoas convivem bem com isso","Acontece todo dia/semana e gera retrabalho, erro ou prejuízo"],["Já gastam tempo/dinheiro com isso","Como resolvem hoje e quanto custa?","Ninguém gasta nada nem se preocupa em resolver","Já pagam por sistema, planilha cara ou horas de funcionário"],["Mercado acessível (nº de clientes + acesso)","Quantos clientes existem e vocês chegam neles?","Poucos clientes e sem contato nenhum","Muitos clientes e vocês têm acesso direto (rede do Lucas, listas públicas)"],["Pouca concorrência","Já existe solução boa e barata?","Vários sistemas maduros e baratos","Quase ninguém atende esse nicho, ou atende mal"],["Pouca regulação / risco","Erro do sistema gera problema legal ou de segurança?","Exige certificação/validação pesada e erro é grave","Sem exigência regulatória; erro tem baixo impacto"],["MVP rápido de fazer","Dá para ter uma versão usável em poucas semanas?","Meses de trabalho, muitas integrações","Versão simples e útil em 2 a 4 semanas"],["Receita recorrente","O cliente pagaria mensalidade?","Venda única, uso esporádico","Uso contínuo; mensalidade natural"]]},"comoUsar":["Pesquisa de ideias — Will & Lucas","","OBJETIVO: escolher, com critérios combinados antes, 1 ou 2 ideias para validar com clientes reais.","","ABAS","• Ideias: 16 ideias iniciais + 2 linhas livres. Dê nota de 1 a 5 em cada critério; a nota final e o ranking são calculados sozinhos.","• Critérios: o que significa nota 1 e nota 5 em cada critério (para vocês dois darem notas com o mesmo entendimento).","• Roteiro Lucas: perguntas para a conversa de 30 a 45 min, com coluna de anotações.","• Dores do Lucas: registro das dores que aparecerem na conversa. Cada dor pode virar uma ideia nova na aba Ideias.","","COMO PREENCHER","• Células amarelas com texto azul são para preencher (notas, pesos, anotações). Todo o resto é fórmula ou texto fixo.","• Escala: 1 a 5, onde 5 é sempre o MELHOR para vocês. Ex.: 'Pouca concorrência' com nota 5 = quase ninguém oferece isso.","• A nota final só aparece quando os 7 critérios da linha estão preenchidos.","• As linhas em cinza itálico são exemplos e não entram no ranking. Podem ser apagadas.","","PESOS","• Os pesos da aba Ideias (linha 3) são uma sugestão inicial minha (dor e disposição a pagar pesam mais). Ajustem entre vocês; a nota se recalcula.","","SUGESTÃO DE REGRA DE DECISÃO (combinem antes de pontuar)","• Seguir para validação apenas com ideias que tenham nota final alta E 'Dor real e frequente' com nota 4 ou 5. Nota alta com dor baixa costuma ser ideia bonita que ninguém compra.","• A pontuação só vale depois da conversa com o Lucas e da pesquisa de mesa. Notas antes disso são palpites; anotem a fonte da nota na coluna Observações."],"analise":{"title":"ANÁLISE DE OPORTUNIDADES — triagem preliminar","warn":"Importante: as notas abaixo são hipóteses analíticas, não respostas de clientes. Devem ser substituídas/ajustadas após entrevistas e evidências.","section":"Ranking preliminar","headers":["Rank","ID","Área","Ideia","Dor","Gasto atual","Mercado","Concorrência","Regulação/risco","MVP","Recorrência","Nota ponderada","Prioridade de validação","Observação"],"rows":[[1,12,"IA","Leitura automática de laudos de fornecedores em PDF, com conferência e alertas",5,5,5,3,4,5,5,4.79,"Validar primeiro","Hipótese: combina dor, economia mensurável e MVP rápido; precisa validar acurácia e formatos."],[2,2,"Lab / Química","Rastreio de amostras: recebimento → análise → laudo, com histórico completo",5,5,4,3,3,4,5,4.43,"Validar primeiro","Hipótese: processo crítico e recorrente; boa base para SaaS. Validar integrações e concorrência."],[3,16,"Pequenos negócios","Sistema com WhatsApp e agendamento (pet shops, tabacarias, clínicas)",5,4,5,1,4,5,5,4.43,"Validar primeiro","Hipótese: MVP e mercado acessíveis, porém concorrência muito alta; precisa nichar para vencer."],[4,5,"Lab / Química","Gestão da qualidade: POPs, treinamentos, não conformidades e auditorias",5,5,4,2,3,4,5,4.36,"Validar depois","Hipótese: dor alta e orçamento potencial; mercado mais concorrido e requisitos de qualidade importantes."],[5,3,"Lab / Química","Emissão automática de laudos e certificados de análise a partir dos resultados",4,5,4,2,3,5,5,4.29,"Validar depois","Hipótese: economia de tempo evidente; diferenciação precisa ser investigada."],[6,11,"IA","Assistente que responde perguntas sobre o manual de qualidade e os POPs da empresa",4,4,5,2,4,5,5,4.29,"Validar depois","Hipótese: MVP muito rápido; risco principal é precisão, atualização documental e confiança."],[7,4,"Lab / Química","Gestão de equipamentos: calibração, manutenção e verificação, com agenda e alertas",4,4,4,3,3,5,5,4.14,"Validar depois","Hipótese: dor recorrente e MVP viável; validar quantidade de equipamentos e soluções atuais."],[8,9,"Lab / Química","Portal do cliente para labs prestadores: solicitar análise, acompanhar, baixar laudo",4,4,5,2,4,5,4,4.14,"Baixa prioridade","Hipótese: acesso ao mercado é bom, mas portal genérico tem concorrência."],[9,1,"Lab / Química","Controle de reagentes e estoque (validades, alertas, FISPQ, etiquetas com QR code)",4,4,4,3,3,5,4,4,"Baixa prioridade","Hipótese: dor operacional forte; MVP relativamente simples. Validar frequência e disposição a pagar."],[10,10,"Lab / Química","Gestão de formulações para pequenas indústrias (versões de receita, custo, ficha técnica)",4,4,4,3,3,4,5,4,"Baixa prioridade","Hipótese: recorrência e valor econômico; validar segmentos e complexidade regulatória."],[11,8,"Lab / Química","Captura automática de dados de instrumentos (balança, pHmetro etc.), sem redigitar",5,5,3,3,2,2,5,3.93,"Baixa prioridade","Hipótese: ROI potencial alto; hardware/protocolos e integrações podem tornar o MVP difícil."],[12,13,"QA (experiência do Will)","Validação de sistemas computadorizados e testes automatizados como serviço",5,5,3,4,2,3,3,3.86,"Baixa prioridade","Hipótese: barreira de conhecimento cria diferenciação; modelo inicial é mais serviço que SaaS."],[13,7,"Lab / Química","Resíduos químicos e produtos controlados: conformidade e documentação obrigatória",4,5,3,3,2,3,4,3.71,"Baixa prioridade","Hipótese: problema real, porém risco/regulação aumentam custo de entrada."],[14,6,"Lab / Química","Controle estatístico e incerteza de medição (labs acreditados)",4,4,3,3,2,2,5,3.5,"Baixa prioridade","Hipótese: nicho técnico e recorrente, mas MVP e suporte exigem conhecimento especializado."],[15,14,"Cannabis","Gestão para associações: pacientes, produção, rastreabilidade e prestação de contas",4,4,2,3,1,2,5,3.29,"Baixa prioridade","Hipótese: dor potencial alta, mas mercado/endereço regulatório exigem validação específica."],[16,15,"Cannabis","Análise de canabinoides e controle de qualidade como serviço",4,4,2,3,1,1,2,2.71,"Baixa prioridade","Hipótese: valor técnico alto, porém dependência de laboratório, capital e regulação."]],"execTitle":"Leitura executiva","exec":["1) Melhor candidato para teste rápido: leitura automática de laudos PDF — dor e economia são mensuráveis e o MVP pode começar como serviço assistido por IA.","2) Melhor oportunidade de software vertical: rastreio de amostras — processo crítico, recorrente e com potencial de retenção.","3) Oportunidade comercial ampla, porém concorrida: WhatsApp + agendamento — só faz sentido com um nicho e uma dor específica.","4) Serviço com barreira de conhecimento: validação de sistemas computadorizados — pode gerar caixa antes de virar produto, mas depende de posicionamento e capacidade técnica.","5) Cannabis: não foi descartada, mas deve ficar atrás na validação inicial porque as atividades dependem de enquadramento e exigências regulatórias específicas."]},"roteiro":{"title":"Roteiro da conversa com o Lucas (30 a 45 min)","rules":"Regras: perguntar sobre o PASSADO (o que aconteceu) e não sobre o futuro (o que você compraria). Não apresentar solução nem ideia pronta. Anotar frases exatas. Pedir exemplos. Sem dados confidenciais da empresa dele.","headers":["Bloco","Tempo","Pergunta","O que estamos tentando descobrir","Anotações"],"rows":[["1. Abertura","2 min","Explicar: 'Não vou te vender nada; quero entender como é o seu dia e onde trava.' Combinar: sem nomes de clientes nem dados internos da empresa.","Deixar ele confortável e definir o limite de confidencialidade"],["2. Contexto","5 min","Em que tipo de empresa/laboratório você trabalha e o que ele faz (análises, produção, controle de qualidade)?","Setor exato e tipo de operação"],["2. Contexto","","Quantas pessoas no lab? Quantas amostras/análises por semana, mais ou menos?","Porte e volume"],["2. Contexto","","Que sistemas ou ferramentas vocês usam hoje (planilha, sistema, papel, WhatsApp)?","Como o trabalho é organizado hoje"],["3. Dia a dia","10 min","Me conta o seu último dia de trabalho, do começo ao fim.","Fluxo real do trabalho, sem filtro"],["3. Dia a dia","","O que você precisou refazer ou digitar duas vezes nesta semana?","Retrabalho (sinal forte de dor)"],["3. Dia a dia","","O que você perdeu tempo procurando (documento, resultado, lote, certificado)?","Falhas de organização e rastreio"],["3. Dia a dia","","O que ainda está em planilha, papel ou WhatsApp e não deveria?","Candidatos a automação"],["4. Dores e consequências","10 min","Qual foi o último problema que apareceu numa auditoria, cliente ou análise? O que aconteceu?","Dores com consequência real"],["4. Dores e consequências","","Já houve um erro que custou dinheiro, lote perdido ou retrabalho grande? Como foi?","Tamanho do prejuízo (base para preço)"],["4. Dores e consequências","","O que mais consome o seu tempo por semana e que uma pessoa a mais no lab resolveria?","Ranking de dores por tempo"],["5. Dinheiro e decisão","8 min","Vocês já pagam por algum sistema? Quanto, mais ou menos?","Disposição a pagar e faixa de preço"],["5. Dinheiro e decisão","","Quem decide comprar um sistema ou ferramenta nova? Como é esse processo?","Quem paga e quanto demora vender"],["5. Dinheiro e decisão","","Já tentaram implantar algum sistema e abandonaram? Por quê?","Motivos de fracasso a evitar"],["6. Rede e mercado","8 min","Quem mais tem esse problema? Conhece laboratórios pequenos que trabalham sem sistema?","Tamanho e perfil do mercado"],["6. Rede e mercado","","Você consegue me apresentar 3 pessoas do setor para eu conversar 20 minutos?","Acesso a entrevistas (Etapa 3)"],["6. Rede e mercado","","Onde o pessoal do setor se informa (grupos, eventos, associações, sindicatos)?","Canais para alcançar clientes"],["7. Fechamento","2 min","Se você pudesse resolver uma única coisa amanhã, qual seria?","A dor número 1 na visão dele"],["7. Fechamento","","Posso te mandar um resumo do que anotei para você corrigir? Combinamos uma próxima conversa?","Validação e próximo passo"]]},"dores":{"title":"Registro de dores (preencher durante/depois da conversa)","subtitle":"Uma linha por dor. Depois, transfira as mais fortes para a aba Ideias (linhas 'Nova ideia') e pontue.","headers":["#","Dor / situação (nas palavras dele)","Com que frequência","Tempo ou dinheiro perdido","Como resolvem hoje","Quem sofre com isso","Quem paga / decide","Ideia relacionada (nº na aba Ideias)","Força da dor (1–5)"],"example":["—","Exemplo: 'toda semana perco uma tarde procurando o certificado do lote na pasta'","Semanal","Cerca de 4 h/semana","Pasta no computador + planilha","Analista de qualidade","Gerente do lab",3,4],"rowCount":12},"matriz":{"title":"MATRIZ DE VALIDAÇÃO — transforme hipóteses em evidências","rule":"Regra: só aumente a nota quando houver evidência observável (entrevista, processo real, orçamento, pagamento, piloto ou dado público).","headers":["ID","Ideia","Evidência de dor","Como resolvem hoje","Tempo/dinheiro perdido","Quem usa","Quem paga/decide","Concorrentes encontrados","Preço aceitável","Próximo teste"],"defaultNext":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","ids":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"names":["Controle de reagentes e estoque (validades, alertas, FISPQ, etiquetas com QR code)","Rastreio de amostras: recebimento → análise → laudo, com histórico completo","Emissão automática de laudos e certificados de análise a partir dos resultados","Gestão de equipamentos: calibração, manutenção e verificação, com agenda e alertas","Gestão da qualidade: POPs, treinamentos, não conformidades e auditorias","Controle estatístico e incerteza de medição (labs acreditados)","Resíduos químicos e produtos controlados: conformidade e documentação obrigatória","Captura automática de dados de instrumentos (balança, pHmetro etc.), sem redigitar","Portal do cliente para labs prestadores: solicitar análise, acompanhar, baixar laudo","Gestão de formulações para pequenas indústrias (versões de receita, custo, ficha técnica)","Assistente que responde perguntas sobre o manual de qualidade e os POPs da empresa","Leitura automática de laudos de fornecedores em PDF, com conferência e alertas","Validação de sistemas computadorizados e testes automatizados como serviço","Gestão para associações: pacientes, produção, rastreabilidade e prestação de contas","Análise de canabinoides e controle de qualidade como serviço","Sistema com WhatsApp e agendamento (pet shops, tabacarias, clínicas)"],"nextTexts":["Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.","Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."]},"plano":{"title":"PLANO DE AÇÃO — 14 dias para sair de ideias e chegar a evidência","headers":["Etapa","Objetivo","Atividade","Saída esperada","Critério de avanço","Prazo sugerido"],"rows":[["1. Escolha do nicho","Reduzir dispersão","Escolher 1 problema principal e 1 público pagante","Hipótese de ICP + problema","Problema ocorre semanalmente e tem custo percebido","Dia 1"],["2. Entrevistas","Testar dor passada","Fazer 5 conversas usando o roteiro da planilha, sem vender solução","5 relatos concretos","≥3 relatam o mesmo problema com frequência","Dias 2–5"],["3. Quantificação","Descobrir ROI","Medir horas, erros, retrabalho, perdas e custo atual","Estimativa de custo da dor","Há economia potencial claramente calculável","Dias 5–7"],["4. Concorrência","Evitar construir commodity","Encontrar 5 alternativas: software, planilha, terceirização ou processo manual","Mapa de alternativas","Existe espaço por nicho, workflow ou integração","Dias 6–8"],["5. Oferta","Testar disposição a pagar","Propor piloto pago ou pré-venda com escopo pequeno","Oferta + preço + condições","Alguém aceita pagar ou assinar piloto","Dias 8–10"],["6. MVP concierge","Provar resultado antes de automatizar","Executar o serviço manualmente/semiautomaticamente para 1 cliente","Resultado mensurável","Cliente repete uso e recomenda/renova","Dias 10–14"],["7. Decisão","Escolher onde investir","Comparar evidências, não entusiasmo","Decisão de continuar, pivotar ou abandonar","Dor + acesso + pagamento + execução viáveis","Dia 14"]]},"fontes":{"title":"FONTES EXTERNAS USADAS NA TRIAGEM","headers":["Tema","Fonte","O que sustenta","URL"],"rows":[["Análises clínicas","Anvisa — RDC 978/2025","Requisitos técnico-sanitários atualizados para serviços que executam exames de análises clínicas.","https://www.gov.br/anvisa/pt-br/centraisdeconteudo/publicacoes/servicosdesaude/perguntas-e-respostas/p-r__978_2025_1a-versao-revisada_portal_27ago2025.pdf"],["Validação","Anvisa — Guia de validação de sistemas computadorizados","Base regulatória/técnica para processos de validação de sistemas computadorizados.","https://www.gov.br/anvisa/pt-br/centraisdeconteudo/publicacoes/medicamentos/publicacoes-sobre-medicamentos/guia-de-validacao-de-sistemas-computadorizados.pdf"],["Cannabis","Anvisa — RDCs 1.012/2026 e 1.013/2026","Requisitos atuais para cultivo medicinal/farmacêutico e pesquisa, incluindo autorização e controles.","https://www.gov.br/anvisa/pt-br/assuntos/medicamentos/controlados/rdcs-no-1-012-2026-e-no-1-013-2026"],["Cannabis","Anvisa — regras de produção de cannabis medicinal","Novo marco regulatório para produção e fabricação/importação de produtos de cannabis medicinal.","https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa/2026/anvisa-publica-regras-para-producao-de-cannabis-medicinal/"],["WhatsApp","Sebrae — Venda mais com o WhatsApp","Contexto de uso do WhatsApp como canal de vendas, atendimento e relacionamento para pequenos negócios.","https://meuatendimento.sebrae.com.br/sites/PortalSebrae/ufs/ba/artigos/venda-mais-com-o-whatsapp-estrategias-para-empresas-em-expansao%2C36ea1c09edf78910VgnVCM1000001b00320aRCRD"]]},"pesquisa":{"title":"SÍNTESE DOCUMENTAL — 16 IDEIAS","subtitle":"Pesquisa de mesa da Fase 2 e síntese da Fase 3, relacionada à triagem preliminar da aba Análise. Evidência documental NÃO comprova dor de cliente, compra ou disposição a pagar. Nenhuma validação humana foi realizada.","headers":["ID","Ideia","Posição/nota preliminar da aba Análise (não validada)","O que a pesquisa documental encontrou","Lacuna que continua aberta","Próximo teste humano sugerido (não executado)","Status da validação humana","Relatório documental de origem"],"rows":[{"id":1,"short":"Controle de reagentes e estoque","prelim":"9 · 4,00","found":"Foram encontrados módulos comerciais de estoque químico e reagentes.","gap":"Frequência de falta/perda, integração ao sistema atual e valor econômico não observados.","next":"Reconstruir um episódio recente de falta, vencimento ou divergência; percorrer entrada → retirada → descarte e comparar com a ferramenta atual.","status":"PENDENTE — não executada","report":"FASE2_ID01_ESTOQUE_REAGENTES.md"},{"id":2,"short":"Rastreio de amostras","prelim":"2 · 4,43","found":"LIMS nacionais e estrangeiros oferecem rastreio de amostras e fluxos relacionados.","gap":"Não se sabe onde os LIMS usados pelo público falham, nem custo de integração ou troca.","next":"Reconstituir uma amostra concluída do recebimento ao laudo e observar localização, status, transições e retrabalho.","status":"PENDENTE — não executada","report":"FASE2_ID02_RASTREIO_AMOSTRAS.md"},{"id":3,"short":"Emissão automática de laudos/COAs","prelim":"5 · 4,29","found":"Geração de relatórios/laudos aparece em diversos LIMS.","gap":"Formato, origem dos resultados, revisão e falha específica no segmento-alvo são desconhecidos.","next":"Acompanhar resultado bruto → documento liberado; mapear digitação, cálculos, revisão, assinatura e correções.","status":"PENDENTE — não executada","report":"FASE2_ID03_EMISSAO_LAUDOS.md"},{"id":4,"short":"Gestão de equipamentos","prelim":"7 · 4,14","found":"Há software metrológico e módulos LIMS para equipamentos, calibração e manutenção.","gap":"Público comprador, lacunas dos sistemas existentes e incidência de indisponibilidade não comprovados.","next":"Percorrer um caso recente de calibração/manutenção e verificar agenda, certificados, bloqueio e consequência.","status":"PENDENTE — não executada","report":"FASE2_ID04_GESTAO_EQUIPAMENTOS.md"},{"id":5,"short":"Gestão da qualidade","prelim":"4 · 4,36","found":"QMS horizontais e módulos de qualidade em LIMS foram encontrados.","gap":"Não foi demonstrada lacuna de nicho nem insatisfação com as soluções atuais.","next":"Observar um ciclo recente de documento/treinamento/não conformidade até encerramento; identificar gargalo e sistema atual.","status":"PENDENTE — não executada","report":"FASE2_ID05_GESTAO_QUALIDADE.md"},{"id":6,"short":"CEP e incerteza de medição","prelim":"14 · 3,50","found":"Ferramentas estatísticas, metrológicas e funções de LIMS se sobrepõem parcialmente.","gap":"CEP, MSA e incerteza são entregas distintas; método, usuário e dor prioritária não definidos.","next":"Escolher um método e um perfil laboratorial; reconstruir análise recente e separar cálculo, interpretação, registro e aprovação.","status":"PENDENTE — não executada","report":"FASE2_ID06_CEP_INCERTEZA_MEDICAO.md"},{"id":7,"short":"Resíduos químicos e produtos controlados","prelim":"13 · 3,71","found":"Foram identificados sistemas EHS/resíduos e substitutos; regras variam por atividade e jurisdição.","gap":"Aplicabilidade regulatória concreta depende do gerador, material/resíduo e local; não validada para comprador.","next":"Delimitar primeiro uma obrigação e jurisdição; entrevistar responsável e percorrer um registro autorizado sem copiar dados sensíveis.","status":"PENDENTE — não executada","report":"FASE2_ID07_RESIDUOS_QUIMICOS_CONTROLADOS.md"},{"id":8,"short":"Captura automática de dados de instrumentos","prelim":"11 · 3,93","found":"Existem fornecedores/integradores e soluções de aquisição de dados.","gap":"Compatibilidade de modelos/protocolos, custo de integração e ROI não verificados.","next":"Inventariar instrumentos de um laboratório-alvo e observar uma transcrição real; PoC apenas em ambiente autorizado.","status":"PENDENTE — não executada","report":"FASE2_ID08_CAPTURA_DADOS_INSTRUMENTOS.md"},{"id":9,"short":"Portal do cliente para laboratórios","prelim":"8 · 4,14","found":"Portal do cliente aparece como módulo em produtos LIMS.","gap":"Problema autônomo e vantagem sobre o portal já incluído no sistema não demonstrados.","next":"Rastrear uma solicitação de análise até a entrega ao cliente; entrevistar solicitante e equipe sobre fricções reais.","status":"PENDENTE — não executada","report":"FASE2_ID09_PORTAL_CLIENTE_LABS.md"},{"id":10,"short":"Gestão de formulações industriais","prelim":"10 · 4,00","found":"Foram localizadas alternativas em ERP e gestão de fórmulas.","gap":"Setor, porte, mudanças de fórmula e exigências aplicáveis precisam ser delimitados.","next":"Selecionar um setor e reconstruir uma alteração de fórmula; mapear versões, aprovações, insumos e retrabalho.","status":"PENDENTE — não executada","report":"FASE2_ID10_GESTAO_FORMULACOES_INDUSTRIAIS.md"},{"id":11,"short":"Assistente para manuais/POPs","prelim":"6 · 4,29","found":"Há produtos de perguntas e respostas sobre documentos e IA.","gap":"Acurácia, versionamento, governança e tolerância a erro no contexto do cliente não testados.","next":"Usar documentos sintéticos/autorizados e gabarito revisado por especialista; medir respostas incorretas, omissões e revisão humana.","status":"PENDENTE — não executada","report":"FASE2_ID11_ASSISTENTE_POP_IA.md"},{"id":12,"short":"Leitura de laudos de fornecedores em PDF","prelim":"1 · 4,79","found":"Extração de PDF/IA e funções correlatas em LIMS estão disponíveis no mercado.","gap":"Acurácia em formatos reais, custo de revisão e integração no público-alvo não comprovados.","next":"Testar PDFs sintéticos ou autorizados com gabarito conferido; medir erros por campo, exceções e tempo total com revisão.","status":"PENDENTE — não executada","report":"FASE2_ID12_LEITURA_LAUDOS_FORNECEDORES.md"},{"id":13,"short":"CSV / validação de sistemas e QA automation","prelim":"12 · 3,86","found":"Há ofertas de consultoria CSV e QA automation; são serviços e compradores distintos.","gap":"Credenciais, experiência, nicho, acesso e capacidade dos proponentes não verificados.","next":"Separar pistas: CSV — caso regulado e documentação; QA — ciclo de release e PoC autorizado. Definir público e competência para cada uma.","status":"PENDENTE — não executada","report":"FASE2_ID13_VALIDACAO_SISTEMAS_TESTES_AUTOMATIZADOS.md"},{"id":14,"short":"Gestão para associações de cannabis","prelim":"15 · 3,29","found":"Plataformas com funções sobrepostas foram encontradas; sandbox regulatório não equivale a autorização geral.","gap":"Enquadramento de cada organização, requisitos, segurança e disposição a pagar desconhecidos.","next":"Validar contexto com interlocutor autorizado e orientação jurídica/sanitária; mapear um fluxo com dados sintéticos/anonimizados.","status":"PENDENTE — não executada","report":"FASE2_ID14_GESTAO_ASSOCIACOES_CANNABIS.md"},{"id":15,"short":"Análise de canabinoides / controle de qualidade","prelim":"16 · 2,71","found":"Há fornecedores/laboratórios anunciando serviços e rotas de parceria ou internalização.","gap":"Escopo oficial, capacidade, demanda, investimento e economia unitária não confirmados.","next":"Comparar cotações e escopos de fornecedores; entrevistar compradores sobre pedidos recentes antes de considerar laboratório próprio.","status":"PENDENTE — não executada","report":"FASE2_ID15_ANALISE_CANABINOIDES_CONTROLE_QUALIDADE.md"},{"id":16,"short":"WhatsApp e agendamento","prelim":"3 · 4,43","found":"Soluções comerciais de agenda/mensagens existem em verticais específicas.","gap":"Pet shops, clínicas e tabacarias não são um ICP único; custo, integração e impacto em faltas não medidos.","next":"Escolher uma vertical; mapear agendamento e faltas recentes, sistema atual e testar protótipo sem mensagem real sem consentimento.","status":"PENDENTE — não executada","report":"FASE2_ID16_WHATSAPP_AGENDAMENTO.md"}]}}</script>
+<script>
+(function () {
+'use strict';
+/* ==========================================================================
+   Gerador mínimo de .xlsx (sem dependências): strings inline, ZIP sem compressão.
+   Suporta: estilos, fórmulas com valor em cache, mesclagens, painéis congelados,
+   filtro automático, validação de dados (inteiro e lista) e escala de cores.
+   ========================================================================== */
+const XLSX_MIN = (() => {
+  const enc = new TextEncoder();
+  const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+  const NS_R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const XML_HEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+
+  const esc = (s) => String(s)
+    .replace(/[^\t\n\r\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/gu, '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const colName = (n) => {
+    let s = '';
+    while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); }
+    return s;
+  };
+  const addr = (r, c) => colName(c) + r;
+  const num = (n) => (Number.isInteger(n) ? String(n) : String(Math.round(n * 1e12) / 1e12));
+
+  /* ---------------- estilos ---------------- */
+  class Styles {
+    constructor() {
+      this.fonts = ['<font><sz val="11"/><name val="Calibri"/><family val="2"/></font>'];
+      this.fills = ['<fill><patternFill patternType="none"/></fill>', '<fill><patternFill patternType="gray125"/></fill>'];
+      this.borders = ['<border><left/><right/><top/><bottom/><diagonal/></border>'];
+      this.numFmts = [];
+      this.xfs = ['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'];
+      this.cache = new Map();
+      this.pool = { font: new Map(), fill: new Map(), border: new Map() };
+    }
+    _idx(kind, list, xml) {
+      const m = this.pool[kind];
+      if (m.has(xml)) return m.get(xml);
+      list.push(xml);
+      m.set(xml, list.length - 1);
+      return list.length - 1;
+    }
+    font(f) {
+      if (!f) return 0;
+      const x = '<font>' + (f.b ? '<b/>' : '') + (f.i ? '<i/>' : '') + `<sz val="${f.sz || 11}"/>` +
+        (f.color ? `<color rgb="${f.color}"/>` : '') + `<name val="${esc(f.name || 'Calibri')}"/><family val="2"/></font>`;
+      return this._idx('font', this.fonts, x);
+    }
+    fill(rgb) {
+      if (!rgb) return 0;
+      return this._idx('fill', this.fills, `<fill><patternFill patternType="solid"><fgColor rgb="${rgb}"/><bgColor indexed="64"/></patternFill></fill>`);
+    }
+    border(kind, color) {
+      if (!kind) return 0;
+      const c = color || 'FFBFBFBF';
+      const side = (n, on) => (on ? `<${n} style="thin"><color rgb="${c}"/></${n}>` : `<${n}/>`);
+      const all = kind === 'all';
+      return this._idx('border', this.borders, '<border>' + side('left', all) + side('right', all) + side('top', all) + side('bottom', true) + '<diagonal/></border>');
+    }
+    numFmt(code) {
+      if (!code || code === 'General') return 0;
+      if (code === '0.00') return 2;
+      if (code === '0') return 1;
+      let i = this.numFmts.indexOf(code);
+      if (i < 0) { this.numFmts.push(code); i = this.numFmts.length - 1; }
+      return 164 + i;
+    }
+    xf(spec) {
+      if (!spec) return 0;
+      const key = JSON.stringify(spec);
+      if (this.cache.has(key)) return this.cache.get(key);
+      const fontId = this.font(spec.font), fillId = this.fill(spec.fill), borderId = this.border(spec.border, spec.bcolor), nf = this.numFmt(spec.fmt);
+      const al = spec.h || spec.v || spec.wrap
+        ? `<alignment${spec.h ? ` horizontal="${spec.h}"` : ''}${spec.v ? ` vertical="${spec.v}"` : ''}${spec.wrap ? ' wrapText="1"' : ''}/>` : '';
+      const x = `<xf numFmtId="${nf}" fontId="${fontId}" fillId="${fillId}" borderId="${borderId}" xfId="0"` +
+        (nf ? ' applyNumberFormat="1"' : '') + (fontId ? ' applyFont="1"' : '') + (fillId ? ' applyFill="1"' : '') +
+        (borderId ? ' applyBorder="1"' : '') + (al ? ' applyAlignment="1">' + al + '</xf>' : '/>');
+      this.xfs.push(x);
+      const id = this.xfs.length - 1;
+      this.cache.set(key, id);
+      return id;
+    }
+    xml() {
+      return XML_HEAD + `<styleSheet xmlns="${NS}">` +
+        (this.numFmts.length ? `<numFmts count="${this.numFmts.length}">${this.numFmts.map((c, i) => `<numFmt numFmtId="${164 + i}" formatCode="${esc(c)}"/>`).join('')}</numFmts>` : '') +
+        `<fonts count="${this.fonts.length}">${this.fonts.join('')}</fonts>` +
+        `<fills count="${this.fills.length}">${this.fills.join('')}</fills>` +
+        `<borders count="${this.borders.length}">${this.borders.join('')}</borders>` +
+        '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+        `<cellXfs count="${this.xfs.length}">${this.xfs.join('')}</cellXfs>` +
+        '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+        '<dxfs count="0"/><tableStyles count="0" defaultTableStyle="TableStyleMedium9" defaultPivotStyle="PivotStyleLight16"/></styleSheet>';
+    }
+  }
+
+  /* ---------------- planilha ---------------- */
+  class Sheet {
+    constructor(name) {
+      this.name = name;
+      this.cells = new Map();
+      this.colWidths = [];
+      this.rowHeights = new Map();
+      this.merges = [];
+      this.freeze = null; // { row, col }: primeira célula rolável
+      this.filter = null;
+      this.validations = [];
+      this.colorScales = [];
+      this.zoom = 0;
+      this.landscape = true;
+    }
+    set(r, c, v, style) { this.cells.set(r * 16384 + c, { r, c, v, style }); return this; }
+    width(c1, c2, w) { this.colWidths.push({ c1, c2, w }); return this; }
+    height(r, h) { this.rowHeights.set(r, h); return this; }
+    merge(r1, c1, r2, c2) { this.merges.push(`${addr(r1, c1)}:${addr(r2, c2)}`); return this; }
+    whole(sqref, min, max, title, msg) { this.validations.push({ type: 'whole', sqref, f1: String(min), f2: String(max), title, msg }); return this; }
+    list(sqref, options) {
+      const joined = options.join(',');
+      if (joined.length <= 250 && !options.some((o) => /[",]/.test(o))) this.validations.push({ type: 'list', sqref, f1: `"${joined}"` });
+      return this;
+    }
+    scale(sqref, stops, colors) { this.colorScales.push({ sqref, stops, colors }); return this; }
+
+    xml(styles, selected) {
+      const byRow = new Map();
+      let maxR = 1, maxC = 1;
+      for (const cell of this.cells.values()) {
+        if (!byRow.has(cell.r)) byRow.set(cell.r, []);
+        byRow.get(cell.r).push(cell);
+        if (cell.r > maxR) maxR = cell.r;
+        if (cell.c > maxC) maxC = cell.c;
+      }
+      const rowNums = Array.from(new Set([...byRow.keys(), ...this.rowHeights.keys()])).sort((a, b) => a - b);
+      let data = '';
+      for (const r of rowNums) {
+        const ht = this.rowHeights.get(r);
+        const cells = (byRow.get(r) || []).sort((a, b) => a.c - b.c);
+        data += `<row r="${r}"${ht ? ` ht="${ht}" customHeight="1"` : ''}>`;
+        for (const cell of cells) data += cellXml(cell, styles);
+        data += '</row>';
+      }
+      let views = `<sheetView workbookViewId="0"${selected ? ' tabSelected="1"' : ''}${this.zoom ? ` zoomScale="${this.zoom}" zoomScaleNormal="${this.zoom}"` : ''}>`;
+      if (this.freeze) {
+        const { row, col } = this.freeze;
+        const tl = addr(row, col);
+        const xs = col > 1 ? ` xSplit="${col - 1}"` : '';
+        const ys = row > 1 ? ` ySplit="${row - 1}"` : '';
+        const pane = col > 1 && row > 1 ? 'bottomRight' : row > 1 ? 'bottomLeft' : 'topRight';
+        views += `<pane${xs}${ys} topLeftCell="${tl}" activePane="${pane}" state="frozen"/>`;
+        if (pane === 'bottomRight') views += `<selection pane="topRight"/><selection pane="bottomLeft"/><selection pane="bottomRight" activeCell="${tl}" sqref="${tl}"/>`;
+        else views += `<selection pane="${pane}" activeCell="${tl}" sqref="${tl}"/>`;
+      }
+      views += '</sheetView>';
+      let cols = '';
+      if (this.colWidths.length) {
+        cols = '<cols>' + this.colWidths.slice().sort((a, b) => a.c1 - b.c1).map((k) => `<col min="${k.c1}" max="${k.c2}" width="${k.w}" customWidth="1"/>`).join('') + '</cols>';
+      }
+      let cf = '';
+      this.colorScales.forEach((s, i) => {
+        cf += `<conditionalFormatting sqref="${s.sqref}"><cfRule type="colorScale" priority="${i + 1}"><colorScale>` +
+          s.stops.map((st) => `<cfvo type="${st.type}"${st.val != null ? ` val="${st.val}"` : ''}/>`).join('') +
+          s.colors.map((c) => `<color rgb="${c}"/>`).join('') + '</colorScale></cfRule></conditionalFormatting>';
+      });
+      let dv = '';
+      if (this.validations.length) {
+        dv = `<dataValidations count="${this.validations.length}">` + this.validations.map((v) =>
+          `<dataValidation type="${v.type}"${v.type === 'whole' ? ' operator="between"' : ''} allowBlank="1" showInputMessage="1" showErrorMessage="1"` +
+          (v.title ? ` errorTitle="${esc(v.title)}"` : '') + (v.msg ? ` error="${esc(v.msg)}"` : '') + ` sqref="${v.sqref}">` +
+          `<formula1>${esc(v.f1)}</formula1>${v.f2 != null ? `<formula2>${esc(v.f2)}</formula2>` : ''}</dataValidation>`).join('') + '</dataValidations>';
+      }
+      return XML_HEAD + `<worksheet xmlns="${NS}" xmlns:r="${NS_R}">` +
+        `<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>` +
+        `<dimension ref="A1:${addr(maxR, maxC)}"/>` +
+        `<sheetViews>${views}</sheetViews>` +
+        '<sheetFormatPr defaultRowHeight="15"/>' + cols +
+        `<sheetData>${data}</sheetData>` +
+        (this.filter ? `<autoFilter ref="${this.filter}"/>` : '') +
+        (this.merges.length ? `<mergeCells count="${this.merges.length}">${this.merges.map((m) => `<mergeCell ref="${m}"/>`).join('')}</mergeCells>` : '') +
+        cf + dv +
+        '<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/>' +
+        `<pageSetup paperSize="9" orientation="${this.landscape ? 'landscape' : 'portrait'}" fitToWidth="1" fitToHeight="0"/>` +
+        '</worksheet>';
+    }
+  }
+
+  function cellXml(cell, styles) {
+    const a = addr(cell.r, cell.c);
+    const sid = styles.xf(cell.style);
+    const sa = sid ? ` s="${sid}"` : '';
+    const v = cell.v;
+    if (v == null || v === '') return `<c r="${a}"${sa}/>`;
+    if (typeof v === 'number') return Number.isFinite(v) ? `<c r="${a}"${sa}><v>${num(v)}</v></c>` : `<c r="${a}"${sa}/>`;
+    if (typeof v === 'object' && v.f != null) {
+      const c = v.v;
+      if (typeof c === 'number' && Number.isFinite(c)) return `<c r="${a}"${sa}><f>${esc(v.f)}</f><v>${num(c)}</v></c>`;
+      return `<c r="${a}"${sa} t="str"><f>${esc(v.f)}</f><v>${esc(c == null ? '' : c)}</v></c>`;
+    }
+    return `<c r="${a}"${sa} t="inlineStr"><is><t xml:space="preserve">${esc(String(v).slice(0, 32767))}</t></is></c>`; // limite de 32.767 caracteres por célula no Excel
+  }
+
+  /* ---------------- ZIP (sem compressão) ---------------- */
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+    return t;
+  })();
+  function crc32(bytes) {
+    let c = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+  function zipBytes(files) {
+    const d = new Date();
+    const dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+    const dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    const parts = [], central = [];
+    let offset = 0;
+    for (const f of files) {
+      const name = enc.encode(f.name);
+      const data = typeof f.data === 'string' ? enc.encode(f.data) : f.data;
+      const crc = crc32(data);
+      const lh = new Uint8Array(30 + name.length), lv = new DataView(lh.buffer);
+      lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true); lv.setUint16(6, 0x0800, true); lv.setUint16(8, 0, true);
+      lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true); lv.setUint32(14, crc, true);
+      lv.setUint32(18, data.length, true); lv.setUint32(22, data.length, true); lv.setUint16(26, name.length, true); lv.setUint16(28, 0, true);
+      lh.set(name, 30);
+      parts.push(lh, data);
+      const ch = new Uint8Array(46 + name.length), cv = new DataView(ch.buffer);
+      cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint16(8, 0x0800, true); cv.setUint16(10, 0, true);
+      cv.setUint16(12, dosTime, true); cv.setUint16(14, dosDate, true); cv.setUint32(16, crc, true);
+      cv.setUint32(20, data.length, true); cv.setUint32(24, data.length, true); cv.setUint16(28, name.length, true);
+      cv.setUint32(42, offset, true);
+      ch.set(name, 46);
+      central.push(ch);
+      offset += lh.length + data.length;
+    }
+    const cdSize = central.reduce((a, c) => a + c.length, 0);
+    const end = new Uint8Array(22), ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
+    ev.setUint32(12, cdSize, true); ev.setUint32(16, offset, true);
+    return [...parts, ...central, end];
+  }
+
+  /* ---------------- pasta de trabalho ---------------- */
+  class Workbook {
+    constructor(props = {}) { this.sheets = []; this.styles = new Styles(); this.props = props; }
+    addSheet(name) { const s = new Sheet(name); this.sheets.push(s); return s; }
+    files() {
+      const n = this.sheets.length;
+      const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+      const sheetsXml = this.sheets.map((s, i) => s.xml(this.styles, i === 0));
+      const names = this.sheets.map((s, i) => (s.filter ? `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${esc(s.name)}'!${s.filter.replace(/([A-Z]+)(\d+)/g, '$$$1$$$2')}</definedName>` : '')).join('');
+      const files = [
+        {
+          name: '[Content_Types].xml',
+          data: XML_HEAD + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+            '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+            '<Default Extension="xml" ContentType="application/xml"/>' +
+            '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+            this.sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('') +
+            '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+            '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
+            '</Types>',
+        },
+        {
+          name: '_rels/.rels',
+          data: XML_HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+            '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
+            '</Relationships>',
+        },
+        {
+          name: 'docProps/core.xml',
+          data: XML_HEAD + '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+            `<dc:title>${esc(this.props.title || '')}</dc:title><dc:creator>${esc(this.props.creator || '')}</dc:creator>` +
+            `<dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified></cp:coreProperties>`,
+        },
+        {
+          name: 'xl/workbook.xml',
+          data: XML_HEAD + `<workbook xmlns="${NS}" xmlns:r="${NS_R}"><workbookPr/>` +
+            '<bookViews><workbookView xWindow="0" yWindow="0" windowWidth="28800" windowHeight="15000" activeTab="0"/></bookViews>' +
+            '<sheets>' + this.sheets.map((s, i) => `<sheet name="${esc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets>' +
+            (names ? `<definedNames>${names}</definedNames>` : '') +
+            '<calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>',
+        },
+        {
+          name: 'xl/_rels/workbook.xml.rels',
+          data: XML_HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+            this.sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('') +
+            `<Relationship Id="rId${n + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`,
+        },
+      ];
+      sheetsXml.forEach((x, i) => files.push({ name: `xl/worksheets/sheet${i + 1}.xml`, data: x }));
+      files.push({ name: 'xl/styles.xml', data: this.styles.xml() }); // depois das planilhas: os estilos são registrados ao serializá-las
+      return files;
+    }
+    toBlob() {
+      return new Blob(zipBytes(this.files()), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    }
+  }
+
+  const excelDate = (iso) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    return m ? Math.round((Date.UTC(+m[1], +m[2] - 1, +m[3]) - Date.UTC(1899, 11, 30)) / 86400000) : null;
+  };
+  return { Workbook, addr, colName, excelDate, crc32 };
+})();
+
+/* ==========================================================================
+   1. DADOS FIXOS (vêm da planilha) + CONSTANTES
+   ========================================================================== */
+const SEED = JSON.parse(document.getElementById('seed-data').textContent);
+const APP_ID = 'omena-pesquisa-ideias-will-lucas';
+const STORE_KEY = 'omena.pesquisa-ideias-will-lucas.v1';
+const DOCS_URL = 'https://github.com/berger33/omena/blob/main/docs/';
+
+const TABS = [
+  { id: 'analise', label: 'Análise' },
+  { id: 'comousar', label: 'Como usar' },
+  { id: 'ideias', label: 'Ideias' },
+  { id: 'criterios', label: 'Critérios' },
+  { id: 'roteiro', label: 'Roteiro Lucas' },
+  { id: 'dores', label: 'Dores do Lucas' },
+  { id: 'matriz', label: 'Matriz de validação' },
+  { id: 'plano', label: 'Plano de ação' },
+  { id: 'fontes', label: 'Fontes' },
+  { id: 'pesquisa', label: 'Pesquisa documental' },
+  { id: 'fichas', label: 'Registro de entrevistas', isNew: true },
+];
+const TAB_IDS = TABS.map((t) => t.id);
+
+const PRIORIDADES = [
+  { v: 'Validar primeiro', cls: 'prio-first' },
+  { v: 'Validar depois', cls: 'prio-later' },
+  { v: 'Baixa prioridade', cls: 'prio-low' },
+  { v: 'Descartada (decisão humana)', cls: 'prio-drop' },
+];
+const STATUS_VALIDACAO = [
+  { v: 'PENDENTE — não executada', cls: 'st-pend' },
+  { v: 'Em preparação', cls: 'st-prep' },
+  { v: 'Em andamento', cls: 'st-run' },
+  { v: 'Concluída — evidências registradas', cls: 'st-done' },
+  { v: 'Pausada', cls: 'st-pause' },
+  { v: 'Descartada pelos humanos', cls: 'st-drop' },
+];
+const NIVEIS_EVIDENCIA = [
+  '',
+  'Dado público / documental',
+  'Relato em entrevista',
+  'Processo real observado',
+  'Pedido de proposta / orçamento',
+  'Piloto autorizado',
+  'Pagamento / compra',
+];
+const STATUS_PLANO = [
+  { v: 'Não iniciada', cls: 'st-pend' },
+  { v: 'Em andamento', cls: 'st-run' },
+  { v: 'Concluída', cls: 'st-done' },
+  { v: 'Bloqueada', cls: 'st-drop' },
+];
+const CRITERIO_ATINGIDO = ['', 'Sim', 'Parcialmente', 'Não'];
+const DECISOES = ['', 'Continuar', 'Pivotar', 'Abandonar'];
+const FREQUENCIAS = ['Diária', 'Semanal', 'Mensal', 'Trimestral', 'Eventual'];
+const MODALIDADES = ['', 'Presencial', 'Videochamada', 'Telefone', 'Mensagem', 'Observação no local'];
+const COMPROMISSOS = ['', 'Nenhum', 'Introdução a outra pessoa', 'Demonstração', 'Proposta', 'Piloto', 'Compra'];
+const STATUS_FONTE = ['Não verificada', 'Aberta — metadados conferidos', 'Lida integralmente', 'Indisponível no acesso'];
+const AREAS_SUGERIDAS = ['Lab / Química', 'IA', 'QA (experiência do Will)', 'Cannabis', 'Pequenos negócios', 'Nova ideia'];
+const CRIT_SHORT = ['Dor', 'Gasto', 'Mercado', 'Concorr.', 'Regul.', 'MVP', 'Recorr.'];
+
+/* Verificação das fontes já existentes na aba Fontes — transcrita de docs/FASE1_VERIFICACAO_FONTES_INICIAIS.md */
+const FONTES_FASE1 = [
+  { k: 'ok', tag: 'Aberta em 29/09/2026', text: 'Página oficial aberta; título, objeto geral (serviços que executam exames de análises clínicas) e criação em 27/08/2025 conferidos. O PDF não foi lido integralmente; vigência atual e artigos específicos não foram conferidos — não sustenta requisitos de nenhuma ideia sem ler a norma.' },
+  { k: 'ok', tag: 'Aberta em 29/09/2026', text: 'Página oficial aberta; título e criação em 22/10/2020 conferidos. PDF não lido. Não prova obrigatoriedade nem escopo por setor: tratar "base regulatória/técnica" com cautela até conferir o guia e as normas aplicáveis.' },
+  { k: 'ok', tag: 'Aberta em 29/09/2026', text: 'Página oficial (publicada em 03/08/2026; modificada em 24/08/2026) aberta. RDC 1.012 = cultivo para pesquisa; RDC 1.013 = cultivo de variedades com THC ≤ 0,3% para fins medicinais, farmacêuticos ou de pesquisa; cultivo só após Autorização Especial da Anvisa. É resumo institucional: não substitui os atos integrais.' },
+  { k: 'warn', tag: 'Aberta — com ressalva', text: 'Notícia oficial (03/02/2026) aberta. Ela diferencia três resoluções e indica a RDC 1.014/2026 como instrumento específico para associações de pacientes sem fins lucrativos; a planilha cita apenas as RDCs 1.012/1.013. Recomenda-se corrigir/complementar antes de usar na análise de cannabis.' },
+  { k: 'bad', tag: 'NÃO VERIFICADA', text: 'Em 29/09/2026 a URL exibiu "Site em manutenção"; o artigo não ficou acessível. Conteúdo alegado não verificado — não usar como evidência até localizar fonte primária/substituta.' },
+];
+
+/* ==========================================================================
+   2. UTILITÁRIOS
+   ========================================================================== */
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+const pad2 = (n) => String(n).padStart(2, '0');
+const fmt2 = (n) => n.toFixed(2).replace('.', ',');
+const fmt1 = (n) => n.toFixed(1).replace('.', ',');
+const nowIso = () => new Date().toISOString();
+const clock = (d = new Date()) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+const stamp = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}_${pad2(d.getHours())}${pad2(d.getMinutes())}`;
+};
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const str = (v, max = 60000) => (typeof v === 'string' ? v.slice(0, max) : typeof v === 'number' && Number.isFinite(v) ? String(v) : '');
+const pick = (v, list, fallback) => (list.includes(v) ? v : fallback);
+const scoreOrNull = (v) => (Number.isInteger(v) && v >= 1 && v <= 5 ? v : null);
+const blankScores = () => [null, null, null, null, null, null, null];
+const safeUrl = (u) => {
+  try {
+    const x = new URL(String(u).trim());
+    return x.protocol === 'http:' || x.protocol === 'https:' ? x.href : '';
+  } catch (e) {
+    return '';
+  }
+};
+const round9 = (n) => Math.round(n * 1e9);
+
+function mixColor(c1, c2, t) {
+  const p = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  const a = p(c1), b = p(c2);
+  return '#' + a.map((x, i) => Math.round(x + (b[i] - x) * t).toString(16).padStart(2, '0')).join('');
+}
+function scale3(v, lo, mid, hi, cLo, cMid, cHi) {
+  if (v <= lo) return cLo;
+  if (v >= hi) return cHi;
+  return v <= mid ? mixColor(cLo, cMid, (v - lo) / (mid - lo)) : mixColor(cMid, cHi, (v - mid) / (hi - mid));
+}
+/* mesma escala de cores da coluna "Nota final" da planilha (1 vermelho → 3 amarelo → 5 verde) */
+const ideaColor = (v) => scale3(v, 1, 3, 5, '#F8696B', '#FFEB84', '#63BE7B');
+
+/* ==========================================================================
+   3. ESTADO + PERSISTÊNCIA
+   ========================================================================== */
+function newExtraIdea(id) {
+  return { id, extra: true, area: 'Nova ideia', name: '', s: blankScores(), obs: '' };
+}
+function newPain() {
+  return { id: uid(), text: '', freq: '', loss: '', today: '', who: '', payer: '', idea: null, strength: null, promoted: null };
+}
+function newFicha() {
+  return {
+    id: uid(), ids: '', date: '', mode: '', who: '', role: '', consent: '', episode: '', tool: '', artifact: '',
+    fact: '', report: '', interp: '', numbers: '', buyer: '', alts: '', objections: '', commit: '', commitNote: '',
+    bias: '', update: '',
+  };
+}
+const FICHA_KEYS = Object.keys(newFicha()).filter((k) => k !== 'id');
+/* rótulos = campos do "Registro em branco para cada entrevista/teste" (docs/FASE4…), com 3 campos desdobrados em mais de um */
+const FICHA_LABELS = {
+  ids: 'ID(s) e versão da hipótese',
+  date: 'Data',
+  mode: 'Modalidade',
+  who: 'Entrevistador(a)',
+  role: 'Perfil/função do participante e critério de inclusão',
+  consent: 'Consentimento/autorização e restrições de uso',
+  episode: 'Episódio concreto e período de referência',
+  tool: 'Processo/ferramenta atual',
+  artifact: 'Artefato observado (descrição sem dado sensível)',
+  fact: 'Fato observado',
+  report: 'Relato do participante',
+  interp: 'Interpretação (separada do fato e do relato)',
+  numbers: 'Frequência/tempo/custo informados e fonte do número',
+  buyer: 'Decisor, pagador e gatilho de compra',
+  alts: 'Alternativas testadas / pagamentos reais',
+  objections: 'Objeções e riscos',
+  commit: 'Próximo compromisso observável',
+  commitNote: 'Detalhe do compromisso',
+  bias: 'Limitação/viés do caso',
+  update: 'Atualização da hipótese e motivo',
+};
+const PAIN_TEXT_KEYS = ['text', 'freq', 'loss', 'today', 'who', 'payer'];
+const MATRIZ_KEYS = ['c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+const PESQ_KEYS = ['owner', 'people', 'budget', 'deadline', 'threshold', 'notes'];
+
+function defaultState() {
+  return {
+    app: APP_ID,
+    version: 1,
+    meta: { createdAt: nowIso(), changedAt: null, lastBackupAt: null },
+    ui: { tab: 'analise', showExIdeas: true, showExDores: true, sortIdeas: 'id', introDismissed: false, openPesq: {}, closedFichas: {} },
+    weights: SEED.ideias.weights.slice(),
+    cutoff: 4,
+    ideas: SEED.ideias.base
+      .map((b) => ({ id: b.id, s: blankScores(), obs: '' }))
+      .concat(SEED.ideias.free.map((f) => newExtraIdea(f.id))),
+    nextIdeaId: 19,
+    prio: Object.fromEntries(SEED.analise.rows.map((r) => [String(r[1]), r[12]])),
+    roteiro: { meta: { date: '', mode: '', who: '', role: '', consent: '' }, notes: {} },
+    pains: Array.from({ length: SEED.dores.rowCount }, newPain),
+    matriz: {},
+    plano: { start: '', steps: SEED.plano.rows.map(() => ({ status: 'Não iniciada', owner: '', crit: '', result: '', decision: '' })) },
+    fontes: { notes: {}, extra: [] },
+    pesq: {},
+    fichas: [],
+  };
+}
+
+function sanitizeScores(arr) {
+  const out = blankScores();
+  if (Array.isArray(arr)) for (let i = 0; i < 7; i++) out[i] = scoreOrNull(arr[i]);
+  return out;
+}
+
+/* Reconstrói um estado válido a partir de qualquer JSON (localStorage ou arquivo importado). */
+function sanitizeState(saved) {
+  const D = defaultState();
+  if (!isObj(saved)) return D;
+  if (isObj(saved.meta)) {
+    D.meta.createdAt = str(saved.meta.createdAt, 40) || D.meta.createdAt;
+    D.meta.changedAt = str(saved.meta.changedAt, 40) || null;
+    D.meta.lastBackupAt = str(saved.meta.lastBackupAt, 40) || null;
+  }
+  if (isObj(saved.ui)) {
+    D.ui.tab = pick(saved.ui.tab, TAB_IDS, 'analise');
+    D.ui.showExIdeas = saved.ui.showExIdeas !== false;
+    D.ui.showExDores = saved.ui.showExDores !== false;
+    D.ui.sortIdeas = saved.ui.sortIdeas === 'rank' ? 'rank' : 'id';
+    D.ui.introDismissed = !!saved.ui.introDismissed;
+    if (isObj(saved.ui.openPesq)) for (const k of Object.keys(saved.ui.openPesq)) if (saved.ui.openPesq[k]) D.ui.openPesq[k] = true;
+    if (isObj(saved.ui.closedFichas)) for (const k of Object.keys(saved.ui.closedFichas)) if (saved.ui.closedFichas[k]) D.ui.closedFichas[k] = true;
+  }
+  if (Array.isArray(saved.weights) && saved.weights.length === 7) {
+    D.weights = saved.weights.map((w, i) => {
+      const n = Number(w);
+      return Number.isFinite(n) && n >= 0 && n <= 99 ? n : D.weights[i];
+    });
+  }
+  const cut = Number(saved.cutoff);
+  if (saved.cutoff !== null && saved.cutoff !== '' && Number.isFinite(cut) && cut >= 0 && cut <= 5) D.cutoff = cut;
+
+  if (Array.isArray(saved.ideas)) {
+    const byId = new Map(saved.ideas.filter(isObj).map((i) => [Number(i.id), i]));
+    const base = D.ideas.filter((i) => !i.extra);
+    for (const it of base) {
+      const sv = byId.get(it.id);
+      if (sv) { it.s = sanitizeScores(sv.s); it.obs = str(sv.obs); }
+    }
+    const seen = new Set();
+    const extras = [];
+    for (const e of saved.ideas.filter(isObj)) {
+      const id = Number(e.id);
+      if (!e.extra || !Number.isInteger(id) || id < 17 || seen.has(id)) continue;
+      seen.add(id);
+      extras.push({ id, extra: true, area: str(e.area, 80) || 'Nova ideia', name: str(e.name, 4000), s: sanitizeScores(e.s), obs: str(e.obs) });
+    }
+    D.ideas = base.concat(extras);
+  }
+  D.nextIdeaId = Math.max(Number(saved.nextIdeaId) || 19, ...D.ideas.map((i) => i.id + 1));
+
+  if (isObj(saved.prio)) {
+    for (const r of SEED.analise.rows) {
+      const v = saved.prio[String(r[1])];
+      if (PRIORIDADES.some((p) => p.v === v)) D.prio[String(r[1])] = v;
+    }
+  }
+  if (isObj(saved.roteiro)) {
+    if (isObj(saved.roteiro.meta)) {
+      D.roteiro.meta.date = str(saved.roteiro.meta.date, 20);
+      D.roteiro.meta.mode = pick(saved.roteiro.meta.mode, MODALIDADES, '');
+      for (const k of ['who', 'role', 'consent']) D.roteiro.meta[k] = str(saved.roteiro.meta[k]);
+    }
+    if (isObj(saved.roteiro.notes)) {
+      for (let i = 0; i < SEED.roteiro.rows.length; i++) { const t = str(saved.roteiro.notes[String(i)]); if (t) D.roteiro.notes[String(i)] = t; }
+    }
+  }
+  if (Array.isArray(saved.pains)) {
+    D.pains = saved.pains.filter(isObj).slice(0, 500).map((p) => {
+      const o = newPain();
+      o.id = str(p.id, 40) || o.id;
+      for (const k of PAIN_TEXT_KEYS) o[k] = str(p[k]);
+      const idea = Number(p.idea);
+      o.idea = p.idea !== null && p.idea !== '' && Number.isInteger(idea) ? idea : null;
+      o.strength = scoreOrNull(p.strength);
+      const pr = Number(p.promoted);
+      o.promoted = p.promoted !== null && Number.isInteger(pr) ? pr : null;
+      return o;
+    });
+  }
+  if (isObj(saved.matriz)) {
+    for (const k of Object.keys(saved.matriz)) {
+      const m = saved.matriz[k];
+      if (!isObj(m) || !/^\d+$/.test(k)) continue;
+      const o = {};
+      for (const f of MATRIZ_KEYS) o[f] = str(m[f]);
+      o.lvl = pick(m.lvl, NIVEIS_EVIDENCIA, '');
+      D.matriz[k] = o;
+    }
+  }
+  if (isObj(saved.plano)) {
+    D.plano.start = /^\d{4}-\d{2}-\d{2}$/.test(str(saved.plano.start, 12)) ? saved.plano.start : '';
+    if (Array.isArray(saved.plano.steps)) {
+      D.plano.steps = D.plano.steps.map((def, i) => {
+        const s = isObj(saved.plano.steps[i]) ? saved.plano.steps[i] : {};
+        return {
+          status: STATUS_PLANO.some((x) => x.v === s.status) ? s.status : def.status,
+          owner: str(s.owner), crit: pick(s.crit, CRITERIO_ATINGIDO, ''), result: str(s.result), decision: pick(s.decision, DECISOES, ''),
+        };
+      });
+    }
+  }
+  if (isObj(saved.fontes)) {
+    if (isObj(saved.fontes.notes)) for (let i = 0; i < SEED.fontes.rows.length; i++) { const t = str(saved.fontes.notes[String(i)]); if (t) D.fontes.notes[String(i)] = t; }
+    if (Array.isArray(saved.fontes.extra)) {
+      D.fontes.extra = saved.fontes.extra.filter(isObj).slice(0, 300).map((f) => ({
+        id: str(f.id, 40) || uid(), tema: str(f.tema, 400), fonte: str(f.fonte, 2000), sustenta: str(f.sustenta), url: str(f.url, 2000),
+        status: pick(f.status, STATUS_FONTE, STATUS_FONTE[0]), date: /^\d{4}-\d{2}-\d{2}$/.test(str(f.date, 12)) ? f.date : '',
+      }));
+    }
+  }
+  if (isObj(saved.pesq)) {
+    for (const k of Object.keys(saved.pesq)) {
+      const p = saved.pesq[k];
+      if (!isObj(p) || !/^\d+$/.test(k)) continue;
+      const o = { status: STATUS_VALIDACAO.some((x) => x.v === p.status) ? p.status : STATUS_VALIDACAO[0].v };
+      for (const f of PESQ_KEYS) o[f] = str(p[f]);
+      D.pesq[k] = o;
+    }
+  }
+  if (Array.isArray(saved.fichas)) {
+    D.fichas = saved.fichas.filter(isObj).slice(0, 500).map((f) => {
+      const o = newFicha();
+      o.id = str(f.id, 40) || o.id;
+      for (const k of FICHA_KEYS) o[k] = str(f[k]);
+      o.mode = pick(o.mode, MODALIDADES, '');
+      o.commit = pick(o.commit, COMPROMISSOS, '');
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(o.date)) o.date = '';
+      return o;
+    });
+  }
+  return D;
+}
+
+let STORAGE_OK = (() => {
+  try { const k = '__omena_probe__'; localStorage.setItem(k, '1'); localStorage.removeItem(k); return true; } catch (e) { return false; }
+})();
+let S;
+function loadState() {
+  if (STORAGE_OK) {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (isObj(parsed) && parsed.app === APP_ID) return sanitizeState(parsed);
+      }
+    } catch (e) { /* estado corrompido: começa do zero */ }
+  }
+  return defaultState();
+}
+
+let saveTimer = null;
+function setSaveStatus(kind, extra) {
+  const el = $('#save-status');
+  if (!el) return;
+  el.className = 'save-status' + (kind === 'saving' ? ' saving' : kind === 'error' ? ' error' : '');
+  const txt = {
+    idle: 'Alterações são salvas automaticamente neste navegador',
+    saving: 'Salvando…',
+    saved: 'Salvo automaticamente às ' + clock(),
+    error: 'Sem salvamento automático neste navegador — baixe um backup',
+  }[kind];
+  el.replaceChildren(h('span', { class: 'dot' }), h('span', { text: extra || txt }));
+}
+function saveNow() {
+  clearTimeout(saveTimer);
+  if (!STORAGE_OK) { setSaveStatus('error'); return false; }
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(S));
+    setSaveStatus('saved');
+    return true;
+  } catch (e) {
+    STORAGE_OK = false;
+    setSaveStatus('error');
+    return false;
+  }
+}
+function touch() {
+  S.meta.changedAt = nowIso();
+  if (STORAGE_OK) setSaveStatus('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 300);
+  updateBackupPip();
+}
+function updateBackupPip() {
+  const b = $('#btn-backup');
+  if (!b) return;
+  const dirty = !!S.meta.changedAt && (!S.meta.lastBackupAt || S.meta.changedAt > S.meta.lastBackupAt);
+  let pip = $('.pip', b);
+  if (dirty && !pip) b.append(h('span', { class: 'pip', title: 'Há alterações ainda não exportadas em backup' }));
+  if (!dirty && pip) pip.remove();
+}
+
+/* ==========================================================================
+   4. DOMÍNIO: ideias, notas, ranking
+   ========================================================================== */
+const baseInfo = (id) => SEED.ideias.base.find((b) => b.id === id);
+const findIdea = (id) => S.ideas.find((i) => i.id === id);
+function ideaName(id, short = false) {
+  const b = baseInfo(id);
+  if (b) return short ? b.short : b.name;
+  const e = findIdea(id);
+  return e ? (e.name || '').trim() : '';
+}
+function ideaArea(id) {
+  const b = baseInfo(id);
+  if (b) return b.area;
+  const e = findIdea(id);
+  return e ? e.area : '';
+}
+function ideaOptionLabel(id) {
+  const nm = ideaName(id, true);
+  const t = nm || '(nova ideia sem nome)';
+  return `#${id} · ${t.length > 64 ? t.slice(0, 61) + '…' : t}`;
+}
+/* ideias "ativas" nas abas de validação: as 16 da planilha + novas ideias que já têm nome */
+function validationIdeas() {
+  return S.ideas.filter((i) => !i.extra || (i.name || '').trim());
+}
+function sumWeights() { return S.weights.reduce((a, b) => a + (Number(b) || 0), 0); }
+
+/* Equivalente a: =SE(E(CONT.NÚM(D:J)=7; $K$3>0); SOMARPRODUTO(D:J; pesos)/$K$3; "") */
+function calcScore(s) {
+  if (s.some((v) => v == null)) return null;
+  const sumW = sumWeights();
+  if (!(sumW > 0)) return null;
+  let num = 0;
+  for (let i = 0; i < 7; i++) num += s[i] * (Number(S.weights[i]) || 0);
+  return { num, value: num / sumW };
+}
+/* Equivalente a: =RANK(K; K6:K23; 0) — empates compartilham a posição */
+function computeRanks() {
+  const list = S.ideas.map((i) => ({ id: i.id, sc: calcScore(i.s) })).filter((x) => x.sc);
+  const m = new Map();
+  for (const a of list) m.set(a.id, 1 + list.filter((b) => round9(b.sc.num) > round9(a.sc.num)).length);
+  return m;
+}
+function teamStats() {
+  const ranks = computeRanks();
+  const total = validationIdeas().length;
+  const scored = validationIdeas().filter((i) => calcScore(i.s)).length;
+  return { ranks, total, scored };
+}
+function painsFilled() { return S.pains.filter((p) => p.text.trim()).length; }
+function getMatriz(id) {
+  const k = String(id);
+  if (!S.matriz[k]) {
+    const b = baseInfo(id);
+    const idx = b ? SEED.matriz.ids.indexOf(id) : -1;
+    S.matriz[k] = { c: '', d: '', e: '', f: '', g: '', h: '', i: '', j: idx >= 0 ? SEED.matriz.nextTexts[idx] : SEED.matriz.defaultNext, lvl: '' };
+  }
+  return S.matriz[k];
+}
+function getPesq(id) {
+  const k = String(id);
+  if (!S.pesq[k]) S.pesq[k] = { status: STATUS_VALIDACAO[0].v, owner: '', people: '', budget: '', deadline: '', threshold: '', notes: '' };
+  return S.pesq[k];
+}
+const pesqHasPlan = (p) => PESQ_KEYS.some((k) => (p[k] || '').trim());
+const matrizFilled = (m) => ['c', 'd', 'e', 'f', 'g', 'h', 'i'].filter((k) => (m[k] || '').trim()).length;
+
+/* ==========================================================================
+   5. PRIMITIVAS DE INTERFACE
+   (DOM montado com createElement/textContent: nenhum dado digitado vira HTML)
+   ========================================================================== */
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  if (props) {
+    for (const [k, v] of Object.entries(props)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+      else if (k === 'data') Object.assign(el.dataset, v);
+      else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (k in el && k !== 'list' && k !== 'form') el[k] = v;
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+  }
+  for (const kid of kids.flat(Infinity)) {
+    if (kid == null || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  return el;
+}
+
+/* ---------- textarea com altura automática (como célula de planilha com quebra de texto) ---------- */
+function autosize(el) {
+  if (!el || !el.isConnected) return;
+  el.style.height = 'auto';
+  const extra = el.offsetHeight - el.clientHeight;
+  el.style.height = el.scrollHeight + extra + 'px';
+}
+let autosizeRaf = 0;
+function flushAutosize() {
+  cancelAnimationFrame(autosizeRaf);
+  autosizeRaf = requestAnimationFrame(() => $$('#panel textarea').forEach(autosize));
+}
+
+/* ---------- aviso de valor inválido (equivale ao "Nota inválida" do Excel) ---------- */
+let lastHint = { msg: '', at: 0 };
+function invalidHint(el, msg) {
+  const cell = el.closest('td') || el.parentElement;
+  if (cell) { cell.classList.add('bad'); setTimeout(() => cell.classList.remove('bad'), 650); }
+  const now = Date.now();
+  if (lastHint.msg === msg && now - lastHint.at < 1800) return;
+  lastHint = { msg, at: now };
+  toast(msg, { type: 'err', ms: 2600 });
+}
+
+/* seleciona o conteúdo depois do foco (o clique do mouse desfaria a seleção se fosse imediato).
+   select() também dá foco no Chromium: só executa se o campo ainda for o ativo, senão roubaria o foco de volta. */
+function selectSoon(el) {
+  setTimeout(() => { if (document.activeElement === el) { try { el.select(); } catch (e) { /* noop */ } } }, 0);
+}
+
+/* ---------- campos ---------- */
+function txt(o) {
+  const el = h('input', { type: o.type || 'text', placeholder: o.ph || '', autocomplete: 'off' });
+  if (o.label) el.setAttribute('aria-label', o.label);
+  if (o.list) el.setAttribute('list', o.list);
+  if (o.nav) el.dataset.nav = o.nav;
+  if (o.cls) el.className = o.cls;
+  if (o.spell === false) el.spellcheck = false;
+  el.value = o.get() == null ? '' : o.get();
+  el.addEventListener('input', () => { o.set(el.value); touch(); if (o.after) o.after(el); });
+  return el;
+}
+function area(o) {
+  const el = h('textarea', { rows: 1, placeholder: o.ph || '' });
+  if (o.label) el.setAttribute('aria-label', o.label);
+  if (o.cls) el.className = o.cls;
+  el.value = o.get() == null ? '' : o.get();
+  el.addEventListener('input', () => { o.set(el.value); autosize(el); touch(); if (o.after) o.after(el); });
+  return el;
+}
+function sel(o) {
+  const el = h('select');
+  if (o.label) el.setAttribute('aria-label', o.label);
+  if (o.cls) el.className = o.cls;
+  for (const op of o.options) {
+    const v = typeof op === 'string' ? op : op.v;
+    const l = typeof op === 'string' ? (op === '' ? o.blank || '—' : op) : op.l || op.v;
+    el.append(h('option', { value: v, text: l }));
+  }
+  const cur = o.get() == null ? '' : String(o.get());
+  el.value = cur;
+  if (el.value !== cur) el.value = '';
+  el.addEventListener('change', () => { o.set(el.value); touch(); if (o.after) o.after(el); });
+  return el;
+}
+/* nota 1–5: aceita só inteiro 1..5, igual à validação de dados da planilha */
+function scoreInput(o) {
+  const el = h('input', { type: 'text', autocomplete: 'off' });
+  el.setAttribute('inputmode', 'numeric');
+  el.setAttribute('aria-label', o.label);
+  el.dataset.nav = o.nav;
+  el.dataset.arrows = '1';
+  const show = () => { const v = o.get(); el.value = v == null ? '' : String(v); };
+  show();
+  el.addEventListener('input', () => {
+    const v = el.value.trim();
+    if (v === '') { o.set(null); touch(); if (o.after) o.after(); return; }
+    if (/^[1-5]$/.test(v)) { o.set(Number(v)); touch(); if (o.after) o.after(); return; }
+    invalidHint(el, 'Nota inválida — use um número inteiro de 1 a 5.');
+    show();
+  });
+  el.addEventListener('focus', () => selectSoon(el));
+  return el;
+}
+/* peso: número ≥ 0 (aceita vírgula) */
+function weightInput(o) {
+  const el = h('input', { type: 'text', autocomplete: 'off' });
+  el.setAttribute('inputmode', 'decimal');
+  el.setAttribute('aria-label', o.label);
+  el.dataset.nav = o.nav;
+  el.dataset.arrows = '1';
+  const show = () => { el.value = String(o.get()).replace('.', ','); };
+  show();
+  el.addEventListener('input', () => {
+    const v = el.value.trim().replace(',', '.');
+    if (v === '') { o.set(0); touch(); if (o.after) o.after(); return; }
+    if (/^\d{1,2}(\.\d{0,2})?$/.test(v) && Number.isFinite(parseFloat(v))) { o.set(parseFloat(v)); touch(); if (o.after) o.after(); return; }
+    invalidHint(el, 'Peso inválido — use um número de 0 a 99.');
+    show();
+  });
+  el.addEventListener('blur', show);
+  el.addEventListener('focus', () => selectSoon(el));
+  return el;
+}
+
+/* ---------- pequenos blocos ---------- */
+const badge = (cls, text, title) => h('span', { class: 'badge ' + cls, text, title: title || null });
+function link(url, text) {
+  const u = safeUrl(url);
+  return u ? h('a', { class: 'link', href: u, target: '_blank', rel: 'noopener noreferrer', text: text || u }) : h('span', { text: text || url });
+}
+const field = (label, control, hint) => h('div', { class: 'field' }, h('label', { text: label }), control, hint ? h('div', { class: 'hint', text: hint }) : null);
+function ctl(el) { el.classList.add('ctl'); return el; }
+function legend() {
+  return h('div', { class: 'legend no-print' },
+    h('span', null, h('span', { class: 'sw in', text: 'abc' }), 'amarelo + azul = preencher'),
+    h('span', null, h('span', { class: 'sw ex' }), 'cinza itálico = exemplo (não conta)'),
+    h('span', null, h('span', { class: 'sw calc' }), 'cinza = calculado automaticamente'),
+    h('span', null, h('span', { class: 'sw fix' }), 'branco = texto fixo'),
+  );
+}
+const pageHead = (title, lead) => [h('h2', { text: title }), lead ? h('p', { class: 'lead', text: lead }) : null].filter(Boolean);
+const callout = (kind, text) => h('div', { class: 'callout ' + kind, text });
+
+/* ---------- tabela estilo planilha ---------- */
+function makeTable({ cols, cls = '', nocard = false }) {
+  let left = 0;
+  let contiguous = true;
+  cols.forEach((c) => {
+    if (c.sticky && contiguous) c.left = left;
+    else { contiguous = false; c.sticky = false; }
+    left += c.w;
+  });
+  const tr = h('tr');
+  cols.forEach((c) => {
+    const th = h('th', { class: c.cls || '', title: c.title || null }, String(c.label).replace(/\//g, '/\u200b'), c.sub ? h('div', { class: 'small', style: { fontWeight: '400', opacity: '.85' }, text: c.sub }) : null);
+    if (c.sticky) { th.classList.add('sticky-l'); th.style.left = c.left + 'px'; if (c.edge) th.classList.add('sticky-edge'); }
+    tr.append(th);
+  });
+  const tbody = h('tbody');
+  const table = h('table', { class: 'sheet ' + cls + (nocard ? ' nocard' : '') },
+    h('colgroup', null, cols.map((c) => h('col', { style: { width: c.w + 'px' } }))),
+    h('thead', null, tr),
+    tbody);
+  table.style.width = cols.reduce((a, c) => a + c.w, 0) + 'px';
+  return { wrap: h('div', { class: 'tablewrap' + (nocard ? ' nocard' : '') }, table), table, tbody, cols };
+}
+/* célula: kind = lista de classes; label = rótulo para o modo cartão (celular) */
+function cell(kind, label, ...kids) {
+  const el = h('td', { class: kind || '' }, ...kids);
+  if (label) el.dataset.label = label;
+  return el;
+}
+function stick(td, cols, i) {
+  if (!cols[i].sticky) return td;
+  td.classList.add('sticky-l');
+  td.style.left = cols[i].left + 'px';
+  if (cols[i].edge) td.classList.add('sticky-edge');
+  return td;
+}
+
+/* ---------- toasts ---------- */
+function toast(msg, opts = {}) {
+  const box = $('#toasts');
+  if (!box) return;
+  const t = h('div', { class: 'toast' + (opts.type ? ' ' + opts.type : ''), role: 'status' }, h('span', { text: msg }));
+  const close = () => t.remove();
+  if (opts.action) t.append(h('button', { type: 'button', text: opts.action, onclick: () => { close(); if (opts.onAction) opts.onAction(); } }));
+  box.append(t);
+  setTimeout(close, opts.ms || 4600);
+  while (box.children.length > 3) box.firstChild.remove();
+}
+
+/* ---------- diálogo de confirmação próprio (window.confirm falha em iframes sandbox) ---------- */
+function confirmDlg({ title, message, ok = 'Confirmar', cancel = 'Cancelar', danger = false }) {
+  return new Promise((resolve) => {
+    if (typeof HTMLDialogElement === 'undefined' || typeof HTMLDialogElement.prototype.showModal !== 'function') {
+      resolve(window.confirm(title + '\n\n' + [].concat(message).join('\n')));
+      return;
+    }
+    const dlg = h('dialog', { class: 'dlg' });
+    const okBtn = h('button', { type: 'button', class: 'btn ' + (danger ? 'dangerfill' : 'primary'), text: ok });
+    const noBtn = h('button', { type: 'button', class: 'btn line', text: cancel });
+    dlg.append(
+      h('div', { class: 'dlg-b' }, h('h4', { text: title }), [].concat(message).map((m) => h('p', { text: m }))),
+      h('div', { class: 'dlg-f' }, noBtn, okBtn),
+    );
+    let result = false;
+    okBtn.addEventListener('click', () => { result = true; dlg.close(); });
+    noBtn.addEventListener('click', () => dlg.close());
+    dlg.addEventListener('close', () => { dlg.remove(); resolve(result); });
+    document.body.append(dlg);
+    dlg.showModal();
+    noBtn.focus();
+  });
+}
+
+/* ---------- navegação estilo planilha: Enter = próxima linha; ↑/↓ nas notas ---------- */
+function navigate(el, dir) {
+  const table = el.closest('table');
+  if (!table) return false;
+  const list = $$(`[data-nav="${el.dataset.nav}"]`, table).filter((x) => x.offsetParent !== null);
+  const target = list[list.indexOf(el) + dir];
+  if (!target) return false;
+  target.focus();
+  if (typeof target.select === 'function') target.select();
+  return true;
+}
+/* clicar em qualquer ponto da célula amarela (não só na linha de texto) passa o foco ao campo */
+document.addEventListener('mousedown', (e) => {
+  const td = e.target;
+  if (!td || td.tagName !== 'TD' || !td.classList.contains('in')) return;
+  const c = td.querySelector('textarea, input:not([type="checkbox"]), select');
+  if (!c) return;
+  e.preventDefault();
+  c.focus();
+  if (c.tagName === 'TEXTAREA' || (c.tagName === 'INPUT' && c.type === 'text')) {
+    try { const n = c.value.length; c.setSelectionRange(n, n); } catch (err) { /* noop */ }
+  }
+});
+document.addEventListener('keydown', (e) => {
+  const el = e.target;
+  if (!el || !el.dataset || !el.dataset.nav || e.isComposing) return;
+  if (el.tagName === 'INPUT') {
+    if (e.key === 'Enter' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      e.preventDefault();
+      navigate(el, e.shiftKey ? -1 : 1);
+    } else if (el.dataset.arrows === '1' && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      if (navigate(el, e.key === 'ArrowDown' ? 1 : -1)) e.preventDefault();
+    }
+  }
+});
+
+/* ---------- download de arquivos gerados no navegador ---------- */
+function downloadBlob(filename, blob) {
+  const url = URL.createObjectURL(blob);
+  const a = h('a', { href: url, download: filename, style: { display: 'none' } });
+  document.body.append(a);
+  a.click();
+  setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 4000);
+}
+
+/* ---------- ações compartilhadas entre abas ---------- */
+function rerender() {
+  const wrap = $('#panel .tablewrap');
+  const st = wrap ? { t: wrap.scrollTop, l: wrap.scrollLeft } : null;
+  const y = window.scrollY;
+  renderCurrent();
+  if (st) { const w = $('#panel .tablewrap'); if (w) { w.scrollTop = st.t; w.scrollLeft = st.l; } }
+  window.scrollTo({ top: y });
+}
+function focusNew(selector) {
+  requestAnimationFrame(() => {
+    const el = $(selector);
+    if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    el.focus({ preventScroll: true });
+  });
+}
+
+/* ==========================================================================
+   6. ABAS (parte A): Análise · Como usar · Ideias · Critérios
+   ========================================================================== */
+const RENDERERS = {};
+
+function kpiCard(n, t, frac) {
+  return h('div', { class: 'kpi' },
+    h('div', { class: 'n', text: n }),
+    h('div', { class: 't', text: t }),
+    frac != null ? h('div', { class: 'bar' }, h('i', { style: { width: Math.round(Math.min(1, Math.max(0, frac)) * 100) + '%' } })) : null);
+}
+function kpiStrip() {
+  const ts = teamStats();
+  const started = SEED.pesquisa.rows.filter((r) => getPesq(r.id).status !== STATUS_VALIDACAO[0].v).length;
+  const done = S.plano.steps.filter((s) => s.status === 'Concluída').length;
+  const nSteps = SEED.plano.rows.length;
+  return h('div', { class: 'kpis no-print' },
+    kpiCard(`${ts.scored}/${ts.total}`, 'ideias pontuadas pela equipe (aba Ideias)', ts.total ? ts.scored / ts.total : 0),
+    kpiCard(String(painsFilled()), 'dores registradas (aba Dores do Lucas)'),
+    kpiCard(`${started}/${SEED.pesquisa.rows.length}`, 'validações humanas iniciadas', started / SEED.pesquisa.rows.length),
+    kpiCard(String(S.fichas.length), 'fichas de entrevista/teste'),
+    kpiCard(`${done}/${nSteps}`, 'etapas do plano de ação concluídas', done / nSteps));
+}
+const median = (arr) => {
+  const a = arr.slice().sort((x, y) => x - y);
+  const m = a.length >> 1;
+  return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+};
+
+/* ------------------------------------------------------------------ ANÁLISE */
+RENDERERS.analise = function renderAnalise() {
+  const A = SEED.analise;
+  const root = h('div');
+  root.append(...pageHead(A.title), callout('warn', A.warn), kpiStrip(), h('h3', { text: A.section }));
+
+  const cols = [
+    { w: 54, label: A.headers[0], cls: 'c' },
+    { w: 44, label: A.headers[1], cls: 'c' },
+    { w: 132, label: A.headers[2] },
+    { w: 300, label: A.headers[3] },
+    ...[4, 5, 6, 7, 8, 9, 10].map((i) => ({ w: [62, 78, 82, 108, 108, 62, 104][i - 4], label: A.headers[i], cls: 'c', title: SEED.ideias.criteria[i - 4] })),
+    { w: 84, label: A.headers[11], cls: 'c', title: 'Nota preliminar ponderada (hipótese da triagem — não validada)' },
+    { w: 168, label: A.headers[12], title: 'Campo editável: registre aqui a decisão de vocês sobre a ordem de validação.' },
+    { w: 330, label: A.headers[13] },
+    { w: 96, label: 'Nota da equipe', sub: '(aba Ideias)', cls: 'c', title: 'Calculada com as notas que vocês preencherem na aba Ideias (aparece quando os 7 critérios estão preenchidos).' },
+    { w: 96, label: 'Rank da equipe', sub: '(aba Ideias)', cls: 'c', title: 'Posição entre as ideias pontuadas na aba Ideias.' },
+  ];
+  const { wrap, tbody } = makeTable({ cols, nocard: true });
+  const vals = A.rows.map((r) => r[11]);
+  const lo = Math.min(...vals), hi = Math.max(...vals), mid = median(vals);
+  const ranks = computeRanks();
+
+  for (const r of A.rows) {
+    const id = Number(r[1]);
+    const tr = h('tr');
+    tr.append(cell('c fx', null, String(r[0])), cell('id', null, String(id)), cell('fx small', null, r[2]), cell('fx', null, r[3]));
+    for (let i = 4; i <= 10; i++) tr.append(cell('c fx', null, String(r[i])));
+    const L = cell('calc', null, fmt2(r[11]));
+    L.style.background = scale3(r[11], lo, mid, hi, '#FEE2E2', '#FEF3C7', '#DCFCE7');
+    tr.append(L);
+
+    const prioTd = cell('in');
+    const paint = () => {
+      PRIORIDADES.forEach((p) => prioTd.classList.remove(p.cls));
+      const cur = PRIORIDADES.find((p) => p.v === S.prio[String(id)]);
+      if (cur) prioTd.classList.add(cur.cls);
+    };
+    prioTd.append(sel({
+      label: `Prioridade de validação — ideia ${id}`,
+      options: PRIORIDADES.map((p) => p.v),
+      get: () => S.prio[String(id)],
+      set: (v) => { S.prio[String(id)] = v; },
+      after: paint,
+    }));
+    paint();
+    tr.append(prioTd, cell('fx small', null, r[13]));
+
+    const idea = findIdea(id);
+    const sc = idea ? calcScore(idea.s) : null;
+    const tn = cell('calc', null, sc ? fmt2(sc.value) : '—');
+    if (sc) tn.style.background = ideaColor(sc.value);
+    tr.append(tn, cell('calc', null, sc ? String(ranks.get(id)) : '—'));
+    tbody.append(tr);
+  }
+  root.append(wrap);
+
+  root.append(h('h3', { text: A.execTitle }));
+  root.append(h('ul', { class: 'exec-list' }, A.exec.map((t) => h('li', { text: t }))));
+  root.append(callout('neutral', 'As colunas de 1 a 5 acima são a triagem preliminar (hipóteses analíticas) e ficam congeladas como registro. A pontuação de vocês é feita na aba Ideias; "Nota da equipe" e "Rank da equipe" mostram o resultado dela aqui. A coluna "Prioridade de validação" é editável para registrar a decisão humana.'));
+  return root;
+};
+
+/* ------------------------------------------------------------------ COMO USAR */
+RENDERERS.comousar = function renderComoUsar() {
+  const lines = SEED.comoUsar;
+  const box = h('div', { class: 'prose' });
+  let ul = null;
+  lines.forEach((raw, idx) => {
+    const line = String(raw || '').trim();
+    if (!line) { ul = null; return; }
+    if (line.startsWith('•')) {
+      if (!ul) { ul = h('ul'); box.append(ul); }
+      ul.append(h('li', { text: line.replace(/^•\s*/, '') }));
+      return;
+    }
+    ul = null;
+    if (idx === 0) { box.append(h('h2', { class: 'h1', text: line })); return; }
+    const m = line.match(/^([A-ZÀ-Ú ]+):\s+(.*)$/);
+    if (m) { box.append(h('p', null, h('b', { text: m[1] + ': ' }), m[2])); return; }
+    box.append(h('h3', { text: line }));
+  });
+
+  const v = h('div');
+  v.append(
+    h('h3', { text: 'Nesta versão editável (HTML)' }),
+    h('ul', null,
+      h('li', null, h('b', { text: 'Tudo o que é amarelo com texto azul pode ser editado ' }), 'e é salvo automaticamente neste navegador (o indicador no topo mostra a hora do último salvamento). O restante é texto fixo ou calculado.'),
+      h('li', null, h('b', { text: 'Backup: ' }), 'use "Baixar backup" ao terminar cada conversa. Para continuar em outro computador, ou enviar ao parceiro, use "Carregar backup" no menu "Mais".'),
+      h('li', null, h('b', { text: 'Exportar Excel: ' }), 'gera um .xlsx com as abas do original (mais o Registro de entrevistas) e os dados que você preencheu; nota final, ranking e regra de decisão saem como fórmulas.'),
+      h('li', null, h('b', { text: 'Ideias: ' }), 'digite a nota (1 a 5); ', h('kbd', { text: 'Enter' }), ' ou ', h('kbd', { text: '↓' }), ' desce para a linha de baixo. Cole um bloco copiado do Excel (', h('kbd', { text: 'Ctrl+V' }), ') para preencher várias notas de uma vez. "Adicionar ideia" cria novas linhas.'),
+      h('li', null, h('b', { text: 'Dores do Lucas: ' }), '"Adicionar dor" cria linhas novas; "→ Ideias" envia a dor para a aba Ideias como nova ideia, já ligada à linha de origem.'),
+      h('li', null, h('b', { text: 'Matriz de validação: ' }), 'além das colunas originais, há "Evidência mais forte" e o indicador de completude (quantos dos 7 campos de evidência foram preenchidos).'),
+      h('li', null, h('b', { text: 'Plano de ação: ' }), 'informe a data de início e as datas de cada etapa são calculadas; registre status, responsável e resultado.'),
+      h('li', null, h('b', { text: 'Pesquisa documental: ' }), 'o status da validação humana é editável; "Planejar" abre os campos de decisão da Fase 4 (responsável, participantes, custo, prazo e critério de continuar/parar).'),
+      h('li', null, h('b', { text: 'Registro de entrevistas (aba nova): ' }), 'uma ficha por entrevista/teste, baseada no modelo em branco da Fase 4, separando fato observado, relato e interpretação.'),
+      h('li', null, h('b', { text: 'Privacidade: ' }), 'nada é enviado para a internet. Os dados ficam só neste navegador e nos arquivos que você baixar. Não registre dados confidenciais de empresas ou pessoas.'),
+    ),
+    h('details', null,
+      h('summary', { text: 'Atalhos' }),
+      h('ul', null,
+        h('li', null, h('kbd', { text: 'Tab' }), ' avança para a próxima célula; ', h('kbd', { text: 'Shift+Tab' }), ' volta.'),
+        h('li', null, h('kbd', { text: 'Enter' }), ' (ou ', h('kbd', { text: '↓' }), ') nas notas, nos pesos e na força da dor desce para a mesma coluna da linha seguinte; ', h('kbd', { text: 'Shift+Enter' }), ' (ou ', h('kbd', { text: '↑' }), ') sobe. Nos campos de texto longo, ', h('kbd', { text: 'Enter' }), ' quebra a linha.'),
+        h('li', null, 'Na aba Ideias, passe o mouse sobre o título de cada critério para ver a pergunta-chave e o que significam a nota 1 e a nota 5.'))),
+    legend(),
+  );
+  box.append(v);
+  return h('div', null, box);
+};
+
+/* ------------------------------------------------------------------ IDEIAS */
+function criterionTooltip(i) {
+  const c = SEED.criterios.rows[i];
+  return `${c[0]}\n${c[1]}\nNota 1: ${c[2]}\nNota 5: ${c[3]}`;
+}
+function ruleBadge(idea, sc) {
+  if (!sc) return h('span', { class: 'muted', text: '—' });
+  if (idea.s[0] < 4) return badge('bad', 'Dor < 4', 'Regra de decisão: só segue para validação com "Dor real e frequente" nota 4 ou 5.');
+  if (sc.value < S.cutoff) return badge('gray', 'Abaixo do corte', `Nota final abaixo do corte definido (${fmt1(S.cutoff)}).`);
+  return badge('ok', 'Segue para validação', `Nota final ≥ ${fmt1(S.cutoff)} e dor real com nota 4 ou 5.`);
+}
+function sortedIdeas() {
+  const list = S.ideas.slice();
+  if (S.ui.sortIdeas !== 'rank') return list.sort((a, b) => a.id - b.id);
+  const ranks = computeRanks();
+  return list.sort((a, b) => {
+    const ra = ranks.get(a.id), rb = ranks.get(b.id);
+    if (ra == null && rb == null) return a.id - b.id;
+    if (ra == null) return 1;
+    if (rb == null) return -1;
+    return ra - rb || a.id - b.id;
+  });
+}
+function addIdea() {
+  const e = newExtraIdea(S.nextIdeaId++);
+  S.ideas.push(e);
+  touch();
+  if (currentTab === 'ideias') { rerender(); focusNew(`tr[data-idea="${e.id}"] textarea`); }
+  return e;
+}
+async function removeIdea(idea) {
+  const hasData = (idea.name || '').trim() || (idea.obs || '').trim() || idea.s.some((v) => v != null);
+  if (hasData) {
+    const ok = await confirmDlg({
+      title: `Excluir a ideia #${idea.id}?`,
+      message: ['A linha, as notas e as observações serão removidas.', 'Dores do Lucas ligadas a ela ficarão sem "ideia relacionada".'],
+      ok: 'Excluir', danger: true,
+    });
+    if (!ok) return;
+  }
+  S.ideas = S.ideas.filter((i) => i !== idea);
+  delete S.matriz[String(idea.id)];
+  delete S.pesq[String(idea.id)];
+  S.pains.forEach((p) => { if (p.idea === idea.id) p.idea = null; if (p.promoted === idea.id) p.promoted = null; });
+  touch();
+  rerender();
+  toast(`Ideia #${idea.id} removida.`);
+}
+
+RENDERERS.ideias = function renderIdeias() {
+  const I = SEED.ideias;
+  const root = h('div');
+  root.append(...pageHead(I.title, I.subtitle), legend());
+
+  const chipScored = h('b');
+  const chipRule = h('b');
+  const cutoff = h('input', { type: 'text', 'aria-label': 'Corte da nota final', value: String(S.cutoff).replace('.', ',') });
+  cutoff.setAttribute('inputmode', 'decimal');
+  cutoff.addEventListener('input', () => {
+    const v = cutoff.value.trim().replace(',', '.');
+    if (v === '') return;
+    const n = parseFloat(v);
+    if (/^\d(\.\d{0,2})?$/.test(v) && n >= 0 && n <= 5) { S.cutoff = n; touch(); updateDerived(); } else { invalidHint(cutoff, 'Corte inválido — use um número de 0 a 5.'); cutoff.value = String(S.cutoff).replace('.', ','); }
+  });
+  cutoff.addEventListener('blur', () => { cutoff.value = String(S.cutoff).replace('.', ','); });
+  const toolbar = h('div', { class: 'toolbar no-print' },
+    h('button', { type: 'button', class: 'btn line', text: 'Ordenar por ranking', onclick: () => { S.ui.sortIdeas = 'rank'; touch(); rerender(); } }),
+    S.ui.sortIdeas === 'rank' ? h('button', { type: 'button', class: 'btn line', text: 'Ordem original', onclick: () => { S.ui.sortIdeas = 'id'; touch(); rerender(); } }) : null,
+    h('button', { type: 'button', class: 'btn primary', text: '+ Adicionar ideia', onclick: addIdea }),
+    h('label', { class: 'inline', title: 'Regra de decisão da aba Como usar: nota final alta E "Dor real e frequente" com nota 4 ou 5. Defina o corte de "alta" antes de pontuar.' }, 'Corte da nota final:', cutoff),
+    h('label', { class: 'inline' }, h('input', { type: 'checkbox', checked: S.ui.showExIdeas, onchange: (e) => { S.ui.showExIdeas = e.target.checked; touch(); rerender(); } }), 'Mostrar linha de exemplo'),
+    h('span', { class: 'grow' }));
+  root.append(toolbar, h('div', { class: 'chips' },
+    h('span', { class: 'chip' }, 'Ideias com nota final: ', chipScored),
+    h('span', { class: 'chip' }, 'Seguem pela regra de decisão: ', chipRule),
+    h('span', { class: 'chip' }, 'Dica: cole um bloco do Excel numa célula de nota para preencher várias de uma vez.')));
+
+  const cols = [
+    { w: 44, label: I.headers[0], cls: 'c', sticky: true },
+    { w: 106, label: I.headers[1], sticky: true },
+    { w: 250, label: I.headers[2], sticky: true, edge: true },
+    ...I.criteria.map((c, i) => ({ w: 98, label: c, cls: 'c', title: criterionTooltip(i) })),
+    { w: 78, label: I.headers[10], cls: 'c' },
+    { w: 70, label: I.headers[11], cls: 'c' },
+    { w: 136, label: 'Regra de decisão', title: 'Regra da aba Como usar: seguir para validação apenas com nota final alta (corte editável acima) E "Dor real e frequente" com nota 4 ou 5.' },
+    { w: 270, label: I.headers[12] },
+    { w: 84, label: '', cls: 'no-print' },
+  ];
+  const { wrap, table, tbody } = makeTable({ cols, cls: 'ideias' });
+  const nCrit = I.criteria.length;
+
+  /* linha de pesos */
+  const trW = h('tr', { class: 'weights' });
+  const tdLab = cell('lab', null, 'Peso →');
+  tdLab.colSpan = 3;
+  tdLab.classList.add('sticky-l', 'sticky-edge');
+  tdLab.style.left = '0px';
+  trW.append(tdLab);
+  for (let i = 0; i < nCrit; i++) {
+    const w = weightInput({ label: `Peso — ${I.criteria[i]}`, nav: 'w' + i, get: () => S.weights[i], set: (v) => { S.weights[i] = v; }, after: () => updateDerived() });
+    w.dataset.wi = i;
+    const td = cell('in score', 'Peso: ' + I.criteria[i], w);
+    td.dataset.short = CRIT_SHORT[i];
+    trW.append(td);
+  }
+  const sumCell = cell('calc', 'Soma dos pesos');
+  const noteW = cell('note', null, '← soma dos pesos (ajustem entre vocês; a nota se recalcula)');
+  noteW.colSpan = 4;
+  trW.append(sumCell, noteW);
+  tbody.append(trW);
+
+  /* linha de exemplo */
+  let exK = null;
+  if (S.ui.showExIdeas) {
+    const ex = I.example;
+    const tr = h('tr', { class: 'example' });
+    tr.append(stick(cell('id', null, String(ex[0])), cols, 0), stick(cell('fx small', null, ex[1]), cols, 1), stick(cell('fx', null, ex[2]), cols, 2));
+    for (let i = 0; i < nCrit; i++) { const td = cell('c', I.criteria[i], String(ex[3 + i])); td.dataset.short = CRIT_SHORT[i]; tr.append(td); }
+    exK = cell('calc', 'Nota final (1–5)');
+    tr.append(exK, cell('c', 'Ranking', String(ex[11])), cell('fx small', null, '—'), cell('fx small', 'Observações / fonte da nota', ex[12]), cell('no-print hide-m'));
+    tbody.append(tr);
+  }
+  const exScores = I.example.slice(3, 3 + nCrit);
+
+  /* linhas das ideias */
+  const refs = [];
+  sortedIdeas().forEach((idea, ri) => {
+    const info = baseInfo(idea.id);
+    const tr = h('tr', { data: { idea: idea.id } });
+    tr.append(stick(cell('id', '#', String(idea.id)), cols, 0));
+    if (idea.extra) {
+      tr.append(
+        stick(cell('in', 'Área', txt({ label: `Área da ideia ${idea.id}`, list: 'areas-list', get: () => idea.area, set: (v) => { idea.area = v; } })), cols, 1),
+        stick(cell('in', 'Ideia', area({ label: `Ideia ${idea.id}`, ph: 'Descreva a nova ideia…', get: () => idea.name, set: (v) => { idea.name = v; } })), cols, 2),
+      );
+    } else {
+      tr.append(stick(cell('fx small', 'Área', info.area), cols, 1), stick(cell('fx', 'Ideia', info.name), cols, 2));
+    }
+    for (let ci = 0; ci < nCrit; ci++) {
+      const inp = scoreInput({
+        label: `${ideaName(idea.id, true) || 'Ideia ' + idea.id} — ${I.criteria[ci]}`,
+        nav: 's' + ci,
+        get: () => idea.s[ci],
+        set: (v) => { idea.s[ci] = v; },
+        after: () => updateDerived(),
+      });
+      inp.dataset.ri = ri;
+      inp.dataset.ci = ci;
+      const td = cell('in score', I.criteria[ci], inp);
+      td.dataset.short = CRIT_SHORT[ci];
+      tr.append(td);
+    }
+    const k = cell('calc', 'Nota final (1–5)');
+    const l = cell('calc', 'Ranking');
+    const rule = cell('fx small', 'Regra de decisão');
+    tr.append(k, l, rule,
+      cell('in', 'Observações / fonte da nota', area({ label: `Observações — ideia ${idea.id}`, ph: 'Fonte da nota, evidência…', get: () => idea.obs, set: (v) => { idea.obs = v; } })));
+    tr.append(cell('no-print', null, idea.extra
+      ? h('div', { class: 'cell-actions' }, h('button', { type: 'button', class: 'btn small danger', text: 'Excluir', title: 'Excluir esta linha de ideia', onclick: () => removeIdea(idea) }))
+      : null));
+    tbody.append(tr);
+    refs.push({ id: idea.id, k, l, rule });
+  });
+  root.append(wrap);
+  root.append(h('datalist', { id: 'areas-list' }, AREAS_SUGERIDAS.map((a) => h('option', { value: a }))));
+
+  function updateDerived() {
+    const ranks = computeRanks();
+    let follows = 0;
+    for (const r of refs) {
+      const idea = findIdea(r.id);
+      const sc = calcScore(idea.s);
+      r.k.textContent = sc ? fmt2(sc.value) : '';
+      r.k.style.background = sc ? ideaColor(sc.value) : '';
+      r.l.textContent = sc ? String(ranks.get(r.id)) : '';
+      r.rule.replaceChildren(ruleBadge(idea, sc));
+      if (sc && idea.s[0] >= 4 && sc.value >= S.cutoff) follows++;
+    }
+    if (exK) { const sc = calcScore(exScores); exK.textContent = sc ? fmt2(sc.value) : ''; }
+    const sw = sumWeights();
+    sumCell.textContent = String(Math.round(sw * 100) / 100).replace('.', ',');
+    sumCell.style.color = sw > 0 ? '' : '#b91c1c';
+    const ts = teamStats();
+    chipScored.textContent = `${ts.scored} de ${ts.total}`;
+    chipRule.textContent = String(follows);
+  }
+
+  /* colar bloco copiado do Excel: preenche notas (ou pesos) a partir da célula ativa */
+  table.addEventListener('paste', (e) => {
+    const t = e.target;
+    if (!(t instanceof HTMLInputElement) || !t.dataset.nav) return;
+    const raw = (e.clipboardData || window.clipboardData).getData('text') || '';
+    const clean = raw.replace(/\r/g, '').replace(/\n+$/, '');
+    if (!/[\t\n]/.test(clean)) return; // valor único: comportamento normal
+    e.preventDefault();
+    const grid = clean.split('\n').map((ln) => ln.split('\t'));
+    let ok = 0, bad = 0;
+    if (t.dataset.ci !== undefined) {
+      const ri = Number(t.dataset.ri), ci = Number(t.dataset.ci);
+      grid.forEach((row, r) => row.forEach((val, c) => {
+        const v = val.trim();
+        if (!v) return;
+        const inp = $(`input[data-ri="${ri + r}"][data-ci="${ci + c}"]`, table);
+        if (!inp) return;
+        if (!/^[1-5]$/.test(v)) { bad++; return; }
+        inp.value = v;
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+        ok++;
+      }));
+    } else if (t.dataset.wi !== undefined) {
+      const wi = Number(t.dataset.wi);
+      (grid[0] || []).forEach((val, c) => {
+        const v = val.trim().replace(',', '.');
+        if (!v) return;
+        const inp = $(`input[data-wi="${wi + c}"]`, table);
+        if (!inp) return;
+        if (!/^\d{1,2}(\.\d{1,2})?$/.test(v)) { bad++; return; }
+        inp.value = v;
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+        ok++;
+      });
+    }
+    toast(`Colado: ${ok} valor(es) aplicado(s)${bad ? `; ${bad} ignorado(s) por estar fora do permitido` : ''}.`, { type: bad ? 'err' : 'ok' });
+  });
+
+  updateDerived();
+  return root;
+};
+
+/* ------------------------------------------------------------------ CRITÉRIOS */
+RENDERERS.criterios = function renderCriterios() {
+  const C = SEED.criterios;
+  const root = h('div');
+  root.append(...pageHead(C.title, 'Combinem o significado das notas antes de pontuar: 5 é sempre o MELHOR para vocês.'));
+  const cols = [
+    { w: 220, label: C.headers[0] },
+    { w: 300, label: C.headers[1] },
+    { w: 310, label: C.headers[2] },
+    { w: 340, label: C.headers[3] },
+    { w: 100, label: 'Peso atual', cls: 'c', title: 'Peso definido na aba Ideias (linha "Peso →").' },
+  ];
+  const { wrap, tbody } = makeTable({ cols });
+  C.rows.forEach((r, i) => {
+    tbody.append(h('tr', null,
+      cell('fx', C.headers[0], h('b', { text: r[0] })),
+      cell('fx', C.headers[1], r[1]),
+      cell('fx', C.headers[2], r[2]),
+      cell('fx', C.headers[3], r[3]),
+      cell('calc', 'Peso atual', String(S.weights[i]).replace('.', ','))));
+  });
+  root.append(wrap);
+  return root;
+};
+
+/* ==========================================================================
+   7. ABAS (parte B): Roteiro · Dores · Matriz · Plano · Fontes · Pesquisa · Fichas
+   ========================================================================== */
+
+/* ------------------------------------------------------------------ ROTEIRO LUCAS */
+RENDERERS.roteiro = function renderRoteiro() {
+  const R = SEED.roteiro;
+  const m = S.roteiro.meta;
+  const root = h('div');
+  root.append(...pageHead(R.title), callout('info', R.rules), legend());
+
+  root.append(h('h3', { text: 'Dados da conversa' }), h('div', { class: 'detail-grid' },
+    field('Data da conversa', ctl(txt({ type: 'date', label: 'Data da conversa', get: () => m.date, set: (v) => { m.date = v; } }))),
+    field('Modalidade', ctl(sel({ label: 'Modalidade', options: MODALIDADES, get: () => m.mode, set: (v) => { m.mode = v; } }))),
+    field('Quem conduziu', ctl(txt({ label: 'Quem conduziu', ph: 'Nome de quem conduziu', get: () => m.who, set: (v) => { m.who = v; } }))),
+    field('Função/perfil de quem está sendo ouvido', ctl(txt({ label: 'Função ou perfil', ph: 'Sem nome de empresa nem dado confidencial', get: () => m.role, set: (v) => { m.role = v; } }))),
+    field('Consentimento e restrições de uso', ctl(area({ label: 'Consentimento e restrições', ph: 'O que foi combinado na abertura', get: () => m.consent, set: (v) => { m.consent = v; } })))));
+
+  const minutes = R.rows.reduce((a, r) => a + (parseInt(r[1], 10) || 0), 0);
+  const chipDone = h('b');
+  root.append(h('div', { class: 'chips' },
+    h('span', { class: 'chip' }, 'Duração prevista: ', h('b', { text: minutes + ' min' })),
+    h('span', { class: 'chip' }, 'Perguntas com anotação: ', chipDone)));
+  const updateProgress = () => { chipDone.textContent = `${Object.keys(S.roteiro.notes).length} de ${R.rows.length}`; };
+
+  const cols = [
+    { w: 158, label: R.headers[0] },
+    { w: 70, label: R.headers[1] },
+    { w: 450, label: R.headers[2] },
+    { w: 280, label: R.headers[3] },
+    { w: 420, label: R.headers[4] },
+  ];
+  const { wrap, tbody } = makeTable({ cols });
+  let prev = '';
+  R.rows.forEach((r, i) => {
+    const first = r[0] !== prev;
+    prev = r[0];
+    const tr = h('tr', first ? { class: 'blockstart' } : null);
+    tr.append(
+      cell('fx' + (first ? '' : ' muted'), R.headers[0], first ? h('b', { text: r[0] }) : r[0]),
+      cell('fx small nowrap', R.headers[1], r[1] || ''),
+      cell('fx', R.headers[2], r[2]),
+      cell('fx small', R.headers[3], r[3]),
+      cell('in', R.headers[4], area({
+        label: `Anotações — pergunta ${i + 1}`,
+        ph: 'Anote frases exatas…',
+        get: () => S.roteiro.notes[String(i)] || '',
+        set: (v) => { if (v) S.roteiro.notes[String(i)] = v; else delete S.roteiro.notes[String(i)]; },
+        after: updateProgress,
+      })));
+    tbody.append(tr);
+  });
+  root.append(wrap);
+  updateProgress();
+  return root;
+};
+
+/* ------------------------------------------------------------------ DORES DO LUCAS */
+function promotePain(p) {
+  const n = S.pains.indexOf(p) + 1;
+  if (!p.text.trim()) { toast('Escreva a dor antes de enviá-la para a aba Ideias.', { type: 'err' }); return; }
+  if (p.promoted != null && findIdea(p.promoted)) { showTab('ideias'); return; }
+  let target = S.ideas.find((i) => i.extra && !(i.name || '').trim() && !(i.obs || '').trim() && i.s.every((v) => v == null));
+  if (!target) { target = newExtraIdea(S.nextIdeaId++); S.ideas.push(target); }
+  target.name = p.text.trim();
+  target.obs = `Origem: aba Dores do Lucas, dor nº ${n}${p.strength ? ` (força ${p.strength}/5)` : ''}. Ainda sem nota nem evidência.`;
+  p.promoted = target.id;
+  p.idea = target.id;
+  touch();
+  rerender();
+  toast(`Dor nº ${n} enviada para a aba Ideias como ideia #${target.id}.`, { action: 'Ver em Ideias', onAction: () => showTab('ideias'), ms: 7000 });
+}
+function addPain() {
+  const p = newPain();
+  S.pains.push(p);
+  touch();
+  rerender();
+  focusNew(`tr[data-pain="${p.id}"] textarea`);
+}
+function removePain(p) {
+  const idx = S.pains.indexOf(p);
+  if (idx < 0) return;
+  S.pains.splice(idx, 1);
+  touch();
+  rerender();
+  toast(`Linha ${idx + 1} removida.`, {
+    action: 'Desfazer', ms: 8000,
+    onAction: () => { S.pains.splice(Math.min(idx, S.pains.length), 0, p); touch(); if (currentTab === 'dores') rerender(); },
+  });
+}
+
+RENDERERS.dores = function renderDores() {
+  const D = SEED.dores;
+  const root = h('div');
+  root.append(...pageHead(D.title, D.subtitle), legend());
+
+  const chipN = h('b'), chipAvg = h('b'), chipHigh = h('b');
+  root.append(h('div', { class: 'toolbar no-print' },
+    h('button', { type: 'button', class: 'btn primary', text: '+ Adicionar dor', onclick: addPain }),
+    h('label', { class: 'inline' }, h('input', { type: 'checkbox', checked: S.ui.showExDores, onchange: (e) => { S.ui.showExDores = e.target.checked; touch(); rerender(); } }), 'Mostrar linha de exemplo'),
+    h('span', { class: 'grow' })));
+  root.append(h('div', { class: 'chips' },
+    h('span', { class: 'chip' }, 'Dores registradas: ', chipN),
+    h('span', { class: 'chip' }, 'Força média: ', chipAvg),
+    h('span', { class: 'chip' }, 'Com força 4 ou 5: ', chipHigh)));
+  const update = () => {
+    chipN.textContent = String(painsFilled());
+    const st = S.pains.filter((p) => p.strength != null).map((p) => p.strength);
+    chipAvg.textContent = st.length ? fmt1(st.reduce((a, b) => a + b, 0) / st.length) : '—';
+    chipHigh.textContent = String(st.filter((v) => v >= 4).length);
+  };
+
+  const cols = [
+    { w: 44, label: D.headers[0], cls: 'c', sticky: true },
+    { w: 320, label: D.headers[1], sticky: true, edge: true },
+    { w: 128, label: D.headers[2] },
+    { w: 176, label: D.headers[3] },
+    { w: 216, label: D.headers[4] },
+    { w: 164, label: D.headers[5] },
+    { w: 164, label: D.headers[6] },
+    { w: 236, label: D.headers[7] },
+    { w: 96, label: D.headers[8], cls: 'c' },
+    { w: 150, label: '', cls: 'no-print' },
+  ];
+  const { wrap, tbody } = makeTable({ cols });
+
+  if (S.ui.showExDores) {
+    const ex = D.example;
+    const tr = h('tr', { class: 'example' });
+    tr.append(stick(cell('id', null, ex[0]), cols, 0));
+    for (let i = 1; i <= 6; i++) tr.append(i === 1 ? stick(cell('fx', D.headers[i], String(ex[i])), cols, 1) : cell('fx', D.headers[i], String(ex[i])));
+    tr.append(cell('c', D.headers[7], String(ex[7])), cell('c', D.headers[8], String(ex[8])), cell('no-print hide-m'));
+    tbody.append(tr);
+  }
+
+  S.pains.forEach((p, idx) => {
+    const n = idx + 1;
+    const tr = h('tr', { data: { pain: p.id } });
+    const opts = [{ v: '', l: '—' }].concat(S.ideas
+      .filter((i) => !i.extra || (i.name || '').trim() || p.idea === i.id)
+      .sort((a, b) => a.id - b.id)
+      .map((i) => ({ v: String(i.id), l: ideaOptionLabel(i.id) })));
+    const linked = p.promoted != null && findIdea(p.promoted);
+    tr.append(
+      stick(cell('id', '#', String(n)), cols, 0),
+      stick(cell('in', D.headers[1], area({ label: `Dor ${n}`, ph: 'Nas palavras dele…', get: () => p.text, set: (v) => { p.text = v; }, after: update })), cols, 1),
+      cell('in', D.headers[2], txt({ label: `Frequência — dor ${n}`, ph: 'Diária, semanal…', list: 'freq-list', get: () => p.freq, set: (v) => { p.freq = v; } })),
+      cell('in', D.headers[3], area({ label: `Tempo ou dinheiro perdido — dor ${n}`, ph: 'Ex.: horas/semana, R$…', get: () => p.loss, set: (v) => { p.loss = v; } })),
+      cell('in', D.headers[4], area({ label: `Como resolvem hoje — dor ${n}`, get: () => p.today, set: (v) => { p.today = v; } })),
+      cell('in', D.headers[5], area({ label: `Quem sofre — dor ${n}`, get: () => p.who, set: (v) => { p.who = v; } })),
+      cell('in', D.headers[6], area({ label: `Quem paga/decide — dor ${n}`, get: () => p.payer, set: (v) => { p.payer = v; } })),
+      cell('in', D.headers[7], sel({ label: `Ideia relacionada — dor ${n}`, options: opts, get: () => (p.idea == null ? '' : String(p.idea)), set: (v) => { p.idea = v === '' ? null : Number(v); } })),
+      cell('in score', D.headers[8], scoreInput({ label: `Força da dor (1–5) — dor ${n}`, nav: 'f', get: () => p.strength, set: (v) => { p.strength = v; }, after: update })),
+      cell('no-print', null, h('div', { class: 'cell-actions' },
+        h('button', { type: 'button', class: 'btn small line', text: linked ? 'Ver em Ideias' : '→ Ideias', title: linked ? 'Esta dor já virou uma ideia' : 'Enviar esta dor para a aba Ideias como nova ideia', onclick: () => promotePain(p) }),
+        h('button', { type: 'button', class: 'btn small danger', text: 'Excluir', title: 'Excluir esta linha (dá para desfazer)', onclick: () => removePain(p) }))));
+    tbody.append(tr);
+  });
+  root.append(wrap);
+  root.append(h('div', { class: 'toolbar no-print' }, h('button', { type: 'button', class: 'btn primary', text: '+ Adicionar dor', onclick: addPain })));
+  root.append(h('datalist', { id: 'freq-list' }, FREQUENCIAS.map((f) => h('option', { value: f }))));
+  update();
+  return root;
+};
+
+/* ------------------------------------------------------------------ MATRIZ DE VALIDAÇÃO */
+RENDERERS.matriz = function renderMatriz() {
+  const M = SEED.matriz;
+  const root = h('div');
+  root.append(...pageHead(M.title), callout('info', M.rule), legend());
+  const cols = [
+    { w: 46, label: M.headers[0], cls: 'c', sticky: true },
+    { w: 240, label: M.headers[1], sticky: true, edge: true },
+    ...[2, 3, 4, 5, 6, 7, 8].map((i) => ({ w: 204, label: M.headers[i] })),
+    { w: 280, label: M.headers[9] },
+    { w: 196, label: 'Evidência mais forte obtida', sub: 'novo', title: 'Regra da matriz: só aumente a nota com evidência observável — entrevista, processo real, orçamento, pagamento, piloto ou dado público.' },
+    { w: 96, label: 'Completude', sub: 'novo', cls: 'c', title: 'Quantos dos 7 campos de evidência (colunas C a I) já foram preenchidos.' },
+  ];
+  const { wrap, tbody } = makeTable({ cols });
+  const keys = ['c', 'd', 'e', 'f', 'g', 'h', 'i'];
+  validationIdeas().forEach((idea) => {
+    const mx = getMatriz(idea.id);
+    const tr = h('tr');
+    tr.append(stick(cell('id', M.headers[0], String(idea.id)), cols, 0), stick(cell('fx', M.headers[1], ideaName(idea.id)), cols, 1));
+    const comp = cell('calc', 'Completude');
+    const upd = () => {
+      const n = matrizFilled(mx);
+      comp.textContent = `${n}/7`;
+      comp.style.background = n === 0 ? '' : n === 7 ? '#bbf7d0' : '#fef3c7';
+    };
+    keys.forEach((k, j) => {
+      tr.append(cell('in', M.headers[2 + j], area({
+        label: `${M.headers[2 + j]} — ideia ${idea.id}`,
+        get: () => mx[k], set: (v) => { mx[k] = v; }, after: upd,
+      })));
+    });
+    tr.append(
+      cell('in', M.headers[9], area({ label: `Próximo teste — ideia ${idea.id}`, get: () => mx.j, set: (v) => { mx.j = v; } })),
+      cell('in', 'Evidência mais forte obtida', sel({ label: `Evidência mais forte — ideia ${idea.id}`, options: NIVEIS_EVIDENCIA, blank: '— nenhuma ainda', get: () => mx.lvl, set: (v) => { mx.lvl = v; } })),
+      comp);
+    upd();
+    tbody.append(tr);
+  });
+  root.append(wrap);
+  return root;
+};
+
+/* ------------------------------------------------------------------ PLANO DE AÇÃO */
+function parseDays(prazo) {
+  const m = String(prazo).match(/(\d+)(?:\s*[–-]\s*(\d+))?/);
+  if (!m) return null;
+  const a = parseInt(m[1], 10);
+  return [a, m[2] ? parseInt(m[2], 10) : a];
+}
+function planDates(start, prazo) {
+  const d = parseDays(prazo);
+  if (!start || !d) return '';
+  const [y, mo, da] = start.split('-').map(Number);
+  const f = (off) => {
+    const x = new Date(y, mo - 1, da + off);
+    return `${pad2(x.getDate())}/${pad2(x.getMonth() + 1)}`;
+  };
+  return d[0] === d[1] ? f(d[0] - 1) : `${f(d[0] - 1)} → ${f(d[1] - 1)}`;
+}
+
+RENDERERS.plano = function renderPlano() {
+  const P = SEED.plano;
+  const root = h('div');
+  root.append(...pageHead(P.title, 'Registre status, responsável e resultado de cada etapa. Informe a data de início (Dia 1) para calcular as datas previstas.'), legend());
+
+  const prog = h('i');
+  const chipDone = h('b');
+  const dateRefs = [];
+  const start = h('input', { type: 'date', 'aria-label': 'Data de início do plano', value: S.plano.start });
+  start.addEventListener('input', () => { S.plano.start = start.value; touch(); dateRefs.forEach((r) => { r.td.textContent = planDates(S.plano.start, r.prazo); }); });
+  root.append(h('div', { class: 'toolbar no-print' }, h('label', { class: 'inline' }, 'Data de início (Dia 1):', start),
+    h('span', { class: 'chip' }, 'Etapas concluídas: ', chipDone, h('span', { class: 'minibar', 'aria-hidden': 'true' }, prog)), h('span', { class: 'grow' })));
+  const updProg = () => {
+    const done = S.plano.steps.filter((s) => s.status === 'Concluída').length;
+    chipDone.textContent = `${done} de ${P.rows.length}`;
+    prog.style.width = Math.round((done / P.rows.length) * 100) + '%';
+  };
+
+  const cols = [
+    { w: 152, label: P.headers[0] },
+    { w: 150, label: P.headers[1] },
+    { w: 250, label: P.headers[2] },
+    { w: 172, label: P.headers[3] },
+    { w: 232, label: P.headers[4] },
+    { w: 94, label: P.headers[5], cls: 'c' },
+    { w: 122, label: 'Datas previstas', sub: 'calculadas', cls: 'c' },
+    { w: 140, label: 'Status', sub: 'novo' },
+    { w: 146, label: 'Responsável', sub: 'novo' },
+    { w: 150, label: 'Critério de avanço atingido?', sub: 'novo' },
+    { w: 330, label: 'Resultado / evidência', sub: 'novo' },
+  ];
+  const { wrap, tbody } = makeTable({ cols });
+  P.rows.forEach((r, i) => {
+    const st = S.plano.steps[i];
+    const tr = h('tr');
+    const dt = cell('calc', 'Datas previstas', planDates(S.plano.start, r[5]));
+    dateRefs.push({ td: dt, prazo: r[5] });
+    const stTd = cell('in', 'Status');
+    const paint = () => {
+      STATUS_PLANO.forEach((s) => stTd.classList.remove(s.cls));
+      const c = STATUS_PLANO.find((s) => s.v === st.status);
+      if (c) stTd.classList.add(c.cls);
+    };
+    stTd.append(sel({ label: `Status — ${r[0]}`, options: STATUS_PLANO.map((s) => s.v), get: () => st.status, set: (v) => { st.status = v; }, after: () => { paint(); updProg(); } }));
+    paint();
+    const res = cell('in', 'Resultado / evidência');
+    if (i === P.rows.length - 1) {
+      res.append(sel({ label: 'Decisão final', options: DECISOES, blank: 'Decisão: ainda não tomada', get: () => st.decision, set: (v) => { st.decision = v; } }));
+    }
+    res.append(area({ label: `Resultado — ${r[0]}`, ph: 'O que aconteceu, evidências, link…', get: () => st.result, set: (v) => { st.result = v; } }));
+    tr.append(
+      cell('fx', P.headers[0], h('b', { text: r[0] })), cell('fx small', P.headers[1], r[1]), cell('fx', P.headers[2], r[2]),
+      cell('fx small', P.headers[3], r[3]), cell('fx small', P.headers[4], r[4]), cell('c fx small nowrap', P.headers[5], r[5]),
+      dt, stTd,
+      cell('in', 'Responsável', txt({ label: `Responsável — ${r[0]}`, ph: 'Quem', get: () => st.owner, set: (v) => { st.owner = v; } })),
+      cell('in', 'Critério de avanço atingido?', sel({ label: `Critério atingido — ${r[0]}`, options: CRITERIO_ATINGIDO, get: () => st.crit, set: (v) => { st.crit = v; } })),
+      res);
+    tbody.append(tr);
+  });
+  root.append(wrap);
+  updProg();
+  return root;
+};
+
+/* ------------------------------------------------------------------ FONTES */
+function addFonte() {
+  const f = { id: uid(), tema: '', fonte: '', sustenta: '', url: '', status: STATUS_FONTE[0], date: '' };
+  S.fontes.extra.push(f);
+  touch();
+  rerender();
+  focusNew(`tr[data-fonte="${f.id}"] input`);
+}
+async function removeFonte(f) {
+  if ([f.tema, f.fonte, f.sustenta, f.url].some((t) => t.trim())) {
+    const ok = await confirmDlg({ title: 'Excluir esta fonte?', message: 'A linha será removida da lista de fontes adicionais.', ok: 'Excluir', danger: true });
+    if (!ok) return;
+  }
+  S.fontes.extra = S.fontes.extra.filter((x) => x !== f);
+  touch();
+  rerender();
+}
+
+RENDERERS.fontes = function renderFontes() {
+  const F = SEED.fontes;
+  const root = h('div');
+  root.append(...pageHead(F.title, 'Em 29/09/2026 (Fase 1), quatro das cinco referências abriram — a F04 com ressalva: a planilha não cita a RDC 1.014/2026, específica para associações. A F05 (Sebrae) exibiu "Site em manutenção" e continua NÃO VERIFICADA. A coluna "Verificação" resume o que foi conferido e o que não foi.'), legend());
+
+  const cols = [
+    { w: 130, label: F.headers[0] },
+    { w: 230, label: F.headers[1] },
+    { w: 300, label: F.headers[2] },
+    { w: 330, label: F.headers[3] },
+    { w: 400, label: 'Verificação (Fase 1)', sub: 'docs/FASE1_VERIFICACAO_FONTES_INICIAIS.md' },
+    { w: 280, label: 'Minhas notas', sub: 'novo' },
+  ];
+  const { wrap, tbody } = makeTable({ cols });
+  F.rows.forEach((r, i) => {
+    const v = FONTES_FASE1[i];
+    tbody.append(h('tr', null,
+      cell('fx', F.headers[0], r[0]), cell('fx', F.headers[1], h('b', { text: r[1] })), cell('fx', F.headers[2], r[2]),
+      cell('fx small', F.headers[3], link(r[3])),
+      cell('fx small', 'Verificação (Fase 1)', v ? [badge(v.k, v.tag), h('div', { style: { marginTop: '5px' }, text: v.text })] : ''),
+      cell('in', 'Minhas notas', area({ label: `Minhas notas — fonte ${i + 1}`, ph: 'Anotações sobre esta fonte…', get: () => S.fontes.notes[String(i)] || '', set: (t) => { if (t) S.fontes.notes[String(i)] = t; else delete S.fontes.notes[String(i)]; } }))));
+  });
+  root.append(wrap);
+
+  root.append(h('h3', { text: 'Fontes adicionais' }), h('p', { class: 'lead', text: 'Acrescente as referências que vocês forem encontrando. Registre só o que foi de fato aberto e lido.' }));
+  root.append(h('div', { class: 'toolbar no-print' }, h('button', { type: 'button', class: 'btn primary', text: '+ Adicionar fonte', onclick: addFonte })));
+  if (!S.fontes.extra.length) {
+    root.append(callout('neutral', 'Nenhuma fonte adicional ainda.'));
+    return root;
+  }
+  const ec = [
+    { w: 40, label: '#', cls: 'c' },
+    { w: 140, label: F.headers[0] },
+    { w: 230, label: F.headers[1] },
+    { w: 290, label: F.headers[2] },
+    { w: 300, label: F.headers[3] },
+    { w: 210, label: 'Verificação' },
+    { w: 140, label: 'Acessada em' },
+    { w: 96, label: '', cls: 'no-print' },
+  ];
+  const t2 = makeTable({ cols: ec });
+  S.fontes.extra.forEach((f, i) => {
+    const open = h('div', { class: 'small', style: { padding: '0 9px 6px', background: 'var(--in-bg)' } });
+    const paintOpen = () => { const u = safeUrl(f.url); open.replaceChildren(u ? h('a', { class: 'link', href: u, target: '_blank', rel: 'noopener noreferrer', text: 'Abrir link' }) : ''); };
+    const urlTd = cell('in', F.headers[3]);
+    const urlInp = txt({ label: `URL — fonte adicional ${i + 1}`, ph: 'https://…', spell: false, get: () => f.url, set: (v) => { f.url = v; }, after: paintOpen });
+    urlInp.setAttribute('inputmode', 'url');
+    urlTd.append(urlInp, open);
+    paintOpen();
+    t2.tbody.append(h('tr', { data: { fonte: f.id } },
+      cell('id', '#', String(i + 1)),
+      cell('in', F.headers[0], txt({ label: `Tema — fonte ${i + 1}`, get: () => f.tema, set: (v) => { f.tema = v; } })),
+      cell('in', F.headers[1], area({ label: `Fonte — ${i + 1}`, get: () => f.fonte, set: (v) => { f.fonte = v; } })),
+      cell('in', F.headers[2], area({ label: `O que sustenta — fonte ${i + 1}`, get: () => f.sustenta, set: (v) => { f.sustenta = v; } })),
+      urlTd,
+      cell('in', 'Verificação', sel({ label: `Verificação — fonte ${i + 1}`, options: STATUS_FONTE, get: () => f.status, set: (v) => { f.status = v; } })),
+      cell('in', 'Acessada em', txt({ type: 'date', label: `Data de acesso — fonte ${i + 1}`, get: () => f.date, set: (v) => { f.date = v; } })),
+      cell('no-print', null, h('div', { class: 'cell-actions' }, h('button', { type: 'button', class: 'btn small danger', text: 'Excluir', onclick: () => removeFonte(f) })))));
+  });
+  root.append(t2.wrap);
+  return root;
+};
+
+/* ------------------------------------------------------------------ PESQUISA DOCUMENTAL */
+RENDERERS.pesquisa = function renderPesquisa() {
+  const Q = SEED.pesquisa;
+  const root = h('div');
+  root.append(...pageHead(Q.title), callout('warn', Q.subtitle), legend());
+
+  const chipBox = h('div', { class: 'chips' });
+  const updChips = () => {
+    chipBox.replaceChildren(...STATUS_VALIDACAO.map((s) => {
+      const n = validationIdeas().filter((i) => getPesq(i.id).status === s.v).length;
+      return h('span', { class: 'chip' }, s.v.split(' — ')[0] + ': ', h('b', { text: String(n) }));
+    }));
+  };
+  root.append(chipBox);
+
+  const cols = [
+    { w: 46, label: Q.headers[0], cls: 'c', sticky: true },
+    { w: 176, label: Q.headers[1], sticky: true, edge: true },
+    { w: 120, label: Q.headers[2], cls: 'c' },
+    { w: 290, label: Q.headers[3] },
+    { w: 274, label: Q.headers[4] },
+    { w: 306, label: Q.headers[5] },
+    { w: 200, label: Q.headers[6], title: 'Campo editável: acompanhe aqui o andamento real da validação humana (entrevistas, observação, protótipo, proposta).' },
+    { w: 218, label: Q.headers[7] },
+    { w: 108, label: 'Plano e anotações', sub: 'novo', cls: 'c no-print' },
+  ];
+  const { wrap, tbody } = makeTable({ cols });
+
+  validationIdeas().forEach((idea) => {
+    const pq = getPesq(idea.id);
+    const row = Q.rows.find((r) => r.id === idea.id);
+    const tr = h('tr', { data: { idea: idea.id } });
+    const stTd = cell('in', Q.headers[6]);
+    const paint = () => {
+      STATUS_VALIDACAO.forEach((s) => stTd.classList.remove(s.cls));
+      const c = STATUS_VALIDACAO.find((s) => s.v === pq.status);
+      if (c) stTd.classList.add(c.cls);
+    };
+    stTd.append(sel({ label: `Status da validação humana — ideia ${idea.id}`, options: STATUS_VALIDACAO.map((s) => s.v), get: () => pq.status, set: (v) => { pq.status = v; }, after: () => { paint(); updChips(); } }));
+    paint();
+
+    const btn = h('button', { type: 'button', class: 'btn small line' });
+    const setBtn = () => { btn.replaceChildren(...[S.ui.openPesq[String(idea.id)] ? 'Fechar' : 'Planejar', pesqHasPlan(pq) ? h('span', { class: 'pip', title: 'Há campos preenchidos' }) : null].filter(Boolean)); };
+    setBtn();
+
+    const mk = (tdRow) => tdRow;
+    tr.append(
+      stick(cell('id', Q.headers[0], String(idea.id)), cols, 0),
+      stick(cell('fx', Q.headers[1], h('b', { text: row ? row.short : ideaName(idea.id) })), cols, 1),
+      cell('c fx', Q.headers[2], row ? row.prelim : '—'),
+      cell('fx small', Q.headers[3], row ? row.found : 'Ainda sem pesquisa documental (ideia adicionada pela equipe).'),
+      cell('fx small', Q.headers[4], row ? row.gap : '—'),
+      cell('fx small', Q.headers[5], row ? row.next : 'Defina o próximo teste na aba Matriz de validação.'),
+      stTd,
+      cell('fx small', Q.headers[7], row ? link(DOCS_URL + row.report, row.report) : '—'),
+      cell('c no-print', null, btn));
+    tbody.append(tr);
+
+    /* linha de detalhe (campos de decisão da Fase 4) */
+    const detail = h('tr', { class: 'detail', data: { detailFor: idea.id } });
+    const inner = h('div', { class: 'detail-inner' },
+      h('div', { class: 'small muted', style: { marginBottom: '8px' }, text: `Campos de decisão da Fase 4 — todos PENDENTE-HUMANO: Will/Lucas definem; nada aqui foi estimado pelo agente. (Ideia #${idea.id})` }),
+      h('div', { class: 'detail-grid' },
+        field('Responsável por executar e custodiar os dados', ctl(txt({ label: 'Responsável', ph: 'PENDENTE-HUMANO', get: () => pq.owner, set: (v) => { pq.owner = v; }, after: setBtn }))),
+        field('Número e perfil dos participantes', ctl(area({ label: 'Participantes', ph: 'PENDENTE-HUMANO', get: () => pq.people, set: (v) => { pq.people = v; }, after: setBtn }))),
+        field('Custo máximo e recursos disponíveis', ctl(area({ label: 'Custo máximo', ph: 'PENDENTE-HUMANO', get: () => pq.budget, set: (v) => { pq.budget = v; }, after: setBtn }))),
+        field('Prazo das entrevistas / piloto', ctl(txt({ label: 'Prazo', ph: 'PENDENTE-HUMANO', get: () => pq.deadline, set: (v) => { pq.deadline = v; }, after: setBtn }))),
+        field('Limiar para continuar/parar', ctl(area({ label: 'Limiar', ph: 'PENDENTE-HUMANO — defina ANTES de coletar', get: () => pq.threshold, set: (v) => { pq.threshold = v; }, after: setBtn })), 'Combine antes de executar o teste.'),
+        field('Anotações e evidências humanas', ctl(area({ label: 'Anotações', ph: 'Fatos, relatos e interpretações — separados', get: () => pq.notes, set: (v) => { pq.notes = v; }, after: setBtn })))));
+    const dtd = h('td', { colSpan: cols.length }, inner);
+    detail.append(dtd);
+    detail.hidden = !S.ui.openPesq[String(idea.id)];
+    btn.addEventListener('click', () => {
+      const k = String(idea.id);
+      S.ui.openPesq[k] = !S.ui.openPesq[k];
+      detail.hidden = !S.ui.openPesq[k];
+      setBtn();
+      touch();
+      if (!detail.hidden) { flushAutosize(); }
+    });
+    tbody.append(detail);
+  });
+  root.append(wrap);
+  updChips();
+  return root;
+};
+
+/* ------------------------------------------------------------------ REGISTRO DE ENTREVISTAS (aba nova) */
+function addFicha() {
+  const f = newFicha();
+  S.fichas.push(f);
+  touch();
+  rerender();
+  focusNew(`[data-ficha="${f.id}"] input, [data-ficha="${f.id}"] textarea`);
+}
+async function removeFicha(f) {
+  if (FICHA_KEYS.some((k) => (f[k] || '').trim())) {
+    const ok = await confirmDlg({ title: 'Excluir esta ficha?', message: 'Todo o conteúdo da ficha será removido. Esta ação não pode ser desfeita.', ok: 'Excluir', danger: true });
+    if (!ok) return;
+  }
+  S.fichas = S.fichas.filter((x) => x !== f);
+  delete S.ui.closedFichas[f.id];
+  touch();
+  rerender();
+}
+function fichaTitle(f, n) {
+  const parts = [`Ficha ${n}`];
+  if (f.date) { const [y, m, d] = f.date.split('-'); parts.push(`${d}/${m}/${y}`); }
+  if (f.ids.trim()) parts.push(`ideia(s): ${f.ids.trim()}`);
+  if (f.role.trim()) parts.push(f.role.trim().split('\n')[0].slice(0, 60));
+  return parts.join(' · ');
+}
+
+RENDERERS.fichas = function renderFichas() {
+  const root = h('div');
+  root.append(...pageHead('Registro de entrevistas e testes',
+    'Uma ficha por entrevista/teste, a partir do modelo em branco da Fase 4 (docs/FASE4_PLANO_VALIDACAO_HUMANA_16_IDEIAS.md). Separe fato observado, relato do participante e interpretação. Não registre resposta hipotética como compromisso nem dados confidenciais.'));
+  root.append(h('div', { class: 'toolbar no-print' },
+    h('button', { type: 'button', class: 'btn primary', text: '+ Nova ficha', onclick: addFicha }),
+    h('span', { class: 'chip' }, 'Fichas: ', h('b', { text: String(S.fichas.length) })),
+    h('span', { class: 'grow' })));
+  if (!S.fichas.length) root.append(callout('neutral', 'Nenhuma ficha ainda. Clique em "+ Nova ficha" ao começar uma entrevista ou teste.'));
+
+  S.fichas.forEach((f, idx) => {
+    const n = idx + 1;
+    const ttl = h('div', { class: 'ttl', text: fichaTitle(f, n) });
+    const upd = () => { ttl.textContent = fichaTitle(f, n); };
+    const card = h('div', { class: 'card' + (S.ui.closedFichas[f.id] ? ' collapsed' : ''), data: { ficha: f.id } });
+    const toggle = () => { const c = card.classList.toggle('collapsed'); if (c) S.ui.closedFichas[f.id] = true; else delete S.ui.closedFichas[f.id]; touch(); if (!c) flushAutosize(); };
+    const head = h('div', { class: 'card-h', onclick: (e) => { if (!e.target.closest('button')) toggle(); } },
+      ttl,
+      h('button', { type: 'button', class: 'btn small line no-print', text: 'Recolher/expandir', onclick: toggle }),
+      h('button', { type: 'button', class: 'btn small danger no-print', text: 'Excluir', onclick: () => removeFicha(f) }));
+    const T = (k, ph, hint) => field(FICHA_LABELS[k], ctl(area({ label: FICHA_LABELS[k], ph, get: () => f[k], set: (v) => { f[k] = v; }, after: upd })), hint);
+    const I = (k, ph, type) => field(FICHA_LABELS[k], ctl(txt({ type: type || 'text', label: FICHA_LABELS[k], ph, get: () => f[k], set: (v) => { f[k] = v; }, after: upd })));
+    const P = (k, options) => field(FICHA_LABELS[k], ctl(sel({ label: FICHA_LABELS[k], options, get: () => f[k], set: (v) => { f[k] = v; } })));
+    const body = h('div', { class: 'card-b' },
+      h('div', { class: 'sec', text: 'Identificação' }),
+      h('div', { class: 'detail-grid' },
+        I('ids', 'Ex.: ideia 12 · hipótese v1'),
+        I('date', '', 'date'),
+        P('mode', MODALIDADES),
+        I('who', 'Quem conduziu'),
+        T('role', 'Sem nome de empresa'),
+        T('consent', 'O que foi autorizado')),
+      h('div', { class: 'sec', text: 'O que aconteceu' }),
+      h('div', { class: 'detail-grid' },
+        T('episode', 'Conte a última vez que…'),
+        T('tool'),
+        T('artifact'),
+        T('fact', 'O que você viu acontecer'),
+        T('report', 'Palavras dele, literais quando possível'),
+        T('interp', 'O que você acha que isso significa')),
+      h('div', { class: 'sec', text: 'Números e decisão' }),
+      h('div', { class: 'detail-grid' },
+        T('numbers', 'Medido ou só memória?'),
+        T('buyer'),
+        T('alts'),
+        T('objections'),
+        P('commit', COMPROMISSOS),
+        T('commitNote', 'Quem, o quê e quando')),
+      h('div', { class: 'sec', text: 'Fechamento' }),
+      h('div', { class: 'detail-grid' },
+        T('bias'),
+        T('update')));
+    card.append(head, body);
+    root.append(card);
+  });
+  if (S.fichas.length > 2) root.append(h('div', { class: 'toolbar no-print' }, h('button', { type: 'button', class: 'btn primary', text: '+ Nova ficha', onclick: addFicha })));
+  return root;
+};
+
+/* ==========================================================================
+   8. EXPORTAR: Excel (.xlsx), backup JSON, importar, apagar, imprimir
+   ========================================================================== */
+const XF = (() => {
+  const A = { name: 'Arial', sz: 10 };
+  const GREY = 'FF7F7F7F';
+  const IN_F = 'FFFFF2CC', IN_C = 'FF0000FF';
+  const C11 = { name: 'Calibri', sz: 11 };
+  const bl = { font: { ...C11, color: IN_C }, fill: IN_F, border: 'bottom', bcolor: 'FFD1D5DB', v: 'top', wrap: true };
+  return {
+    /* abas originais (Arial 10, azul marinho) */
+    t1: { font: { name: 'Arial', sz: 14, b: true, color: 'FF1F3864' }, v: 'bottom' },
+    sub: { font: { ...A, i: true, color: GREY }, v: 'bottom' },
+    subw: { font: { ...A, i: true, color: GREY }, v: 'top', wrap: true },
+    hdr: { font: { ...A, b: true, color: 'FFFFFFFF' }, fill: 'FF1F3864', border: 'all', h: 'center', v: 'center', wrap: true },
+    hdrNew: { font: { ...A, b: true, color: 'FFFFFFFF' }, fill: 'FF2563EB', border: 'all', h: 'center', v: 'center', wrap: true },
+    fix: { font: A, border: 'all', v: 'top', wrap: true },
+    fixb: { font: { ...A, b: true }, border: 'all', v: 'top', wrap: true },
+    fixc: { font: A, border: 'all', h: 'center', v: 'center', wrap: true },
+    inp: { font: { ...A, color: IN_C }, fill: IN_F, border: 'all', v: 'top', wrap: true },
+    inc: { font: { ...A, color: IN_C }, fill: IN_F, border: 'all', h: 'center', v: 'center', wrap: true },
+    incDate: { font: { ...A, color: IN_C }, fill: IN_F, border: 'all', h: 'center', v: 'center', fmt: 'dd/mm/yyyy' },
+    incOne: { font: { ...A, color: IN_C }, fill: IN_F, border: 'all', h: 'center', v: 'center', fmt: '0.0' },
+    calc: { font: { ...A, b: true }, border: 'all', h: 'center', v: 'center', wrap: true, fmt: '0.00' },
+    calcg: { font: { ...A, b: true }, border: 'all', h: 'center', v: 'center', wrap: true },
+    calcT: { font: { ...A, b: true }, fill: 'FFF0F2F6', border: 'all', h: 'center', v: 'center', wrap: true },
+    bold: { font: { ...A, b: true }, v: 'top', wrap: true },
+    boldR: { font: { ...A, b: true }, h: 'right', v: 'bottom' },
+    text: { font: A, v: 'top', wrap: true },
+    exF: { font: { ...A, i: true, color: GREY }, fill: 'FFEDEDED', border: 'all', v: 'top', wrap: true },
+    exC: { font: { ...A, i: true, color: GREY }, fill: 'FFEDEDED', border: 'all', h: 'center', v: 'center', wrap: true },
+    exN: { font: { ...A, i: true, color: GREY }, fill: 'FFEDEDED', border: 'all', h: 'center', v: 'center', wrap: true, fmt: '0.00' },
+    /* abas novas (Calibri 11, cinza-azulado) */
+    t2: { font: { name: 'Calibri', sz: 15, b: true, color: 'FFFFFFFF' }, fill: 'FF1F2937', v: 'center' },
+    warn2: { font: { ...C11, i: true, color: 'FF92400E' }, fill: 'FFFEF3C7', v: 'center', wrap: true },
+    h2: { font: { ...C11, b: true, color: 'FFFFFFFF' }, fill: 'FF2563EB', v: 'center', wrap: true },
+    sec2: { font: { name: 'Calibri', sz: 13, b: true, color: 'FF1F2937' } },
+    b2: { font: C11, border: 'bottom', bcolor: 'FFD1D5DB', v: 'top', wrap: true },
+    b2c: { font: C11, border: 'bottom', bcolor: 'FFD1D5DB', h: 'center', v: 'top', wrap: true },
+    b2n: { font: C11, border: 'bottom', bcolor: 'FFD1D5DB', h: 'center', v: 'top', wrap: true, fmt: '0.00' },
+    in2: bl,
+    in2c: { ...bl, h: 'center' },
+    in2d: { ...bl, h: 'center', fmt: 'dd/mm/yyyy' },
+    calc2: { font: { ...C11, b: true }, fill: 'FFF0F2F6', border: 'bottom', bcolor: 'FFD1D5DB', h: 'center', v: 'top', wrap: true },
+    calc2n: { font: { ...C11, b: true }, fill: 'FFF0F2F6', border: 'bottom', bcolor: 'FFD1D5DB', h: 'center', v: 'top', wrap: true, fmt: '0.00' },
+    prio: (rgb) => ({ font: C11, fill: rgb, border: 'bottom', bcolor: 'FFD1D5DB', v: 'top', wrap: true }),
+  };
+})();
+const PRIO_FILL = { 'Validar primeiro': 'FFDCFCE7', 'Validar depois': 'FFFEF3C7', 'Baixa prioridade': 'FFFEE2E2', 'Descartada (decisão humana)': 'FFE5E7EB' };
+
+function buildWorkbook() {
+  const wb = new XLSX_MIN.Workbook({ title: 'Pesquisa de ideias — Will & Lucas (exportado da versão HTML editável)', creator: 'Will & Lucas' });
+  const I = SEED.ideias;
+  const ranks = computeRanks();
+  const nW = I.criteria.length;
+  const ideasSorted = S.ideas.slice().sort((a, b) => a.id - b.id);
+  const FIRST = 6;
+  const LAST = 5 + ideasSorted.length;
+  const pct = (n) => n; // valor em cache com precisão total; o Excel recalcula ao abrir
+
+  /* ---------------- Análise ---------------- */
+  {
+    const A = SEED.analise;
+    const ws = wb.addSheet('Análise');
+    ws.set(1, 1, A.title, XF.t2).merge(1, 1, 1, 16).height(1, 30);
+    ws.set(2, 1, A.warn, XF.warn2).merge(2, 1, 2, 16).height(2, 32);
+    ws.set(4, 1, A.section, XF.sec2);
+    A.headers.forEach((t, i) => ws.set(5, i + 1, t, XF.h2));
+    ws.set(5, 15, 'Nota da equipe (aba Ideias)', XF.h2).set(5, 16, 'Rank da equipe (aba Ideias)', XF.h2).height(5, 34);
+    A.rows.forEach((r, i) => {
+      const row = 6 + i, id = Number(r[1]);
+      [0, 1].forEach((c) => ws.set(row, c + 1, r[c], XF.b2));
+      ws.set(row, 3, r[2], XF.b2).set(row, 4, r[3], XF.b2);
+      for (let c = 4; c <= 10; c++) ws.set(row, c + 1, r[c], XF.b2);
+      ws.set(row, 12, r[11], XF.b2n);
+      ws.set(row, 13, S.prio[String(id)], XF.prio(PRIO_FILL[S.prio[String(id)]] || 'FFE5E7EB'));
+      ws.set(row, 14, r[13], XF.b2);
+      const idea = findIdea(id), sc = idea ? calcScore(idea.s) : null;
+      ws.set(row, 15, { f: `IFERROR(INDEX(Ideias!$K$${FIRST}:$K$${LAST},MATCH($B${row},Ideias!$A$${FIRST}:$A$${LAST},0)),"")`, v: sc ? pct(sc.value) : '' }, XF.calc2n);
+      ws.set(row, 16, { f: `IFERROR(INDEX(Ideias!$L$${FIRST}:$L$${LAST},MATCH($B${row},Ideias!$A$${FIRST}:$A$${LAST},0)),"")`, v: sc ? ranks.get(id) : '' }, XF.calc2);
+    });
+    ws.set(25, 1, A.execTitle, XF.sec2);
+    A.exec.forEach((t, i) => { ws.set(26 + i, 1, t, XF.b2).merge(26 + i, 1, 26 + i, 16).height(26 + i, 32); });
+    [8, 6, 20, 55, 8, 11, 10, 13, 14, 8, 11, 14, 22, 62, 16, 14].forEach((w, i) => ws.width(i + 1, i + 1, w));
+    ws.list('M6:M21', PRIORIDADES.map((p) => p.v));
+    ws.freeze = { row: 6, col: 1 };
+    ws.filter = 'A5:P21';
+    ws.scale('L6:L21', [{ type: 'min' }, { type: 'percentile', val: 50 }, { type: 'max' }], ['FFFEE2E2', 'FFFEF3C7', 'FFDCFCE7']);
+  }
+
+  /* ---------------- Como usar ---------------- */
+  {
+    const ws = wb.addSheet('Como usar');
+    ws.landscape = false;
+    SEED.comoUsar.forEach((line, i) => {
+      const t = String(line || '');
+      if (!t) return;
+      if (i === 0) ws.set(1, 1, t, { font: { name: 'Arial', sz: 14, b: true, color: 'FF1F3864' }, v: 'top', wrap: true }).height(1, 20);
+      else ws.set(i + 1, 1, t, t.startsWith('•') ? XF.text : XF.bold);
+    });
+    ws.width(1, 1, 115);
+  }
+
+  /* ---------------- Ideias ---------------- */
+  {
+    const ws = wb.addSheet('Ideias');
+    const wsum = sumWeights();
+    ws.set(1, 1, I.title, XF.t1);
+    ws.set(2, 1, I.subtitle, XF.sub);
+    ws.set(3, 3, 'Peso →', XF.boldR);
+    for (let k = 0; k < nW; k++) ws.set(3, 4 + k, S.weights[k], XF.inc);
+    ws.set(3, 11, { f: 'SUM(D3:J3)', v: wsum }, XF.calcg);
+    ws.set(3, 12, '← soma dos pesos', XF.sub);
+    ws.set(2, 14, 'Corte da nota final (regra de decisão):', XF.sub);
+    ws.set(3, 14, S.cutoff, XF.incOne);
+    I.headers.forEach((t, i) => ws.set(4, i + 1, t, XF.hdr));
+    ws.set(4, 14, 'Regra de decisão', XF.hdrNew).height(4, 54.75);
+    /* linha de exemplo */
+    const ex = I.example;
+    const exSc = calcScore(ex.slice(3, 3 + nW));
+    ws.set(5, 1, ex[0], XF.exC).set(5, 2, ex[1], XF.exC).set(5, 3, ex[2], XF.exF);
+    for (let k = 0; k < nW; k++) ws.set(5, 4 + k, ex[3 + k], XF.exC);
+    ws.set(5, 11, { f: 'IF(AND(COUNT(D5:J5)=7,$K$3>0),SUMPRODUCT(D5:J5,$D$3:$J$3)/$K$3,"")', v: exSc ? pct(exSc.value) : '' }, XF.exN);
+    ws.set(5, 12, ex[11], XF.exC).set(5, 13, ex[12], XF.exF);
+    /* ideias */
+    ideasSorted.forEach((it, i) => {
+      const r = FIRST + i;
+      const sc = calcScore(it.s);
+      ws.set(r, 1, it.id, XF.fixc);
+      if (it.extra) {
+        ws.set(r, 2, it.area, XF.inp).set(r, 3, it.name, XF.inp);
+      } else {
+        const b = baseInfo(it.id);
+        ws.set(r, 2, b.area, XF.fix).set(r, 3, b.name, XF.fix);
+      }
+      for (let k = 0; k < nW; k++) ws.set(r, 4 + k, it.s[k], XF.inc);
+      ws.set(r, 11, { f: `IF(AND(COUNT(D${r}:J${r})=7,$K$3>0),SUMPRODUCT(D${r}:J${r},$D$3:$J$3)/$K$3,"")`, v: sc ? pct(sc.value) : '' }, XF.calc);
+      ws.set(r, 12, { f: `IF(K${r}="","",RANK(K${r},$K$${FIRST}:$K$${LAST},0))`, v: sc ? ranks.get(it.id) : '' }, XF.calcg);
+      ws.set(r, 13, it.obs, XF.inp);
+      const rule = !sc ? '' : it.s[0] < 4 ? 'Dor < 4' : sc.value < S.cutoff ? 'Abaixo do corte' : 'Segue para validação';
+      ws.set(r, 14, { f: `IF(K${r}="","",IF(D${r}<4,"Dor < 4",IF(K${r}<$N$3,"Abaixo do corte","Segue para validação")))`, v: rule }, XF.calcT);
+    });
+    [5, 20, 52, 13, 15, 17, 13, 13, 13, 12, 10, 40, 24].forEach((w, i) => ws.width(i + 1, i + 1, w));
+    ws.whole(`D5:J${LAST}`, 1, 5, 'Nota inválida', 'Use um número inteiro de 1 a 5.');
+    ws.freeze = { row: 5, col: 4 };
+    ws.scale(`K${FIRST}:K${LAST}`, [{ type: 'num', val: 1 }, { type: 'num', val: 3 }, { type: 'num', val: 5 }], ['FFF8696B', 'FFFFEB84', 'FF63BE7B']);
+  }
+
+  /* ---------------- Critérios ---------------- */
+  {
+    const C = SEED.criterios;
+    const ws = wb.addSheet('Critérios');
+    ws.set(1, 1, C.title, XF.t1);
+    C.headers.forEach((t, i) => ws.set(3, i + 1, t, XF.hdr));
+    ws.set(3, 5, 'Peso atual', XF.hdrNew);
+    C.rows.forEach((r, i) => {
+      ws.set(4 + i, 1, r[0], XF.fixb).set(4 + i, 2, r[1], XF.fix).set(4 + i, 3, r[2], XF.fix).set(4 + i, 4, r[3], XF.fix);
+      ws.set(4 + i, 5, { f: `Ideias!${XLSX_MIN.colName(4 + i)}$3`, v: S.weights[i] }, XF.calcg);
+    });
+    [34, 44, 46, 52, 12].forEach((w, i) => ws.width(i + 1, i + 1, w));
+    ws.landscape = false;
+  }
+
+  /* ---------------- Roteiro Lucas ---------------- */
+  {
+    const R = SEED.roteiro;
+    const ws = wb.addSheet('Roteiro Lucas');
+    ws.set(1, 1, R.title, XF.t1);
+    ws.set(2, 1, R.rules, XF.subw).merge(2, 1, 2, 5).height(2, 44);
+    R.headers.forEach((t, i) => ws.set(4, i + 1, t, XF.hdr));
+    R.rows.forEach((r, i) => {
+      const row = 5 + i;
+      ws.set(row, 1, r[0], XF.fixb).set(row, 2, r[1], XF.fix).set(row, 3, r[2], XF.fix).set(row, 4, r[3], XF.fix);
+      ws.set(row, 5, S.roteiro.notes[String(i)] || '', XF.inp);
+    });
+    const m = S.roteiro.meta, b = 5 + R.rows.length + 2;
+    ws.set(b, 1, 'Dados da conversa', XF.sec2);
+    const meta = [['Data da conversa', XLSX_MIN.excelDate(m.date), XF.incDate], ['Modalidade', m.mode, XF.inp], ['Quem conduziu', m.who, XF.inp],
+      ['Função/perfil de quem está sendo ouvido', m.role, XF.inp], ['Consentimento e restrições de uso', m.consent, XF.inp]];
+    meta.forEach(([label, val, st], i) => {
+      ws.set(b + 1 + i, 1, label, XF.fixb).set(b + 1 + i, 2, null, XF.fixb);
+      ws.merge(b + 1 + i, 1, b + 1 + i, 2);
+      ws.set(b + 1 + i, 3, val, st);
+      ws.set(b + 1 + i, 4, null, st).set(b + 1 + i, 5, null, st);
+      ws.merge(b + 1 + i, 3, b + 1 + i, 5);
+    });
+    [24, 9, 70, 42, 50].forEach((w, i) => ws.width(i + 1, i + 1, w));
+    ws.list(`C${b + 2}`, MODALIDADES.filter(Boolean));
+    ws.freeze = { row: 5, col: 1 };
+    ws.landscape = false;
+  }
+
+  /* ---------------- Dores do Lucas ---------------- */
+  {
+    const D = SEED.dores;
+    const ws = wb.addSheet('Dores do Lucas');
+    ws.set(1, 1, D.title, XF.t1);
+    ws.set(2, 1, D.subtitle, XF.sub);
+    D.headers.forEach((t, i) => ws.set(4, i + 1, t, XF.hdr));
+    ws.set(4, 10, 'Virou a ideia nº', XF.hdrNew).height(4, 45);
+    D.example.forEach((v, i) => ws.set(5, i + 1, v, i === 0 ? XF.exC : XF.exF));
+    S.pains.forEach((p, i) => {
+      const r = 6 + i;
+      ws.set(r, 1, i + 1, XF.fix);
+      ws.set(r, 2, p.text, XF.inp).set(r, 3, p.freq, XF.inp).set(r, 4, p.loss, XF.inp).set(r, 5, p.today, XF.inp).set(r, 6, p.who, XF.inp).set(r, 7, p.payer, XF.inp);
+      ws.set(r, 8, p.idea, XF.inp).set(r, 9, p.strength, XF.inp);
+      ws.set(r, 10, p.promoted, XF.fix);
+    });
+    [5, 52, 18, 22, 28, 22, 20, 20, 14, 16].forEach((w, i) => ws.width(i + 1, i + 1, w));
+    if (S.pains.length) ws.whole(`I6:I${5 + S.pains.length}`, 1, 5, 'Nota inválida', 'Use um número inteiro de 1 a 5.');
+    ws.freeze = { row: 5, col: 1 };
+    ws.landscape = false;
+  }
+
+  /* ---------------- Matriz de validação ---------------- */
+  {
+    const M = SEED.matriz;
+    const ws = wb.addSheet('Matriz de validação');
+    ws.set(1, 1, M.title, XF.t2).merge(1, 1, 1, 12).height(1, 26);
+    ws.set(2, 1, M.rule, XF.warn2).merge(2, 1, 2, 12).height(2, 30);
+    M.headers.forEach((t, i) => ws.set(4, i + 1, t, XF.h2));
+    ws.set(4, 11, 'Evidência mais forte obtida', XF.h2).set(4, 12, 'Completude (campos C–I)', XF.h2);
+    const list = validationIdeas();
+    list.forEach((it, i) => {
+      const r = 5 + i, mx = getMatriz(it.id);
+      ws.set(r, 1, it.id, XF.b2c).set(r, 2, ideaName(it.id), XF.b2);
+      ['c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].forEach((k, j) => ws.set(r, 3 + j, (mx[k] || '').trim() ? mx[k] : null, XF.in2));
+      ws.set(r, 11, mx.lvl, XF.in2);
+      ws.set(r, 12, { f: `COUNTA(C${r}:I${r})&"/7"`, v: `${matrizFilled(mx)}/7` }, XF.calc2);
+    });
+    const last = 4 + list.length;
+    [6, 55, 35, 30, 24, 22, 22, 28, 20, 55, 28, 16].forEach((w, i) => ws.width(i + 1, i + 1, w));
+    ws.list(`K5:K${last}`, NIVEIS_EVIDENCIA.filter(Boolean));
+    ws.freeze = { row: 5, col: 1 };
+    ws.filter = `A4:L${last}`;
+  }
+
+  /* ---------------- Plano de ação ---------------- */
+  {
+    const P = SEED.plano;
+    const ws = wb.addSheet('Plano de ação');
+    ws.set(1, 1, P.title, XF.t2).merge(1, 1, 1, 11).height(1, 26);
+    ws.set(2, 1, 'Data de início (Dia 1):', { font: { name: 'Calibri', sz: 11, b: true }, v: 'center' });
+    ws.set(2, 2, XLSX_MIN.excelDate(S.plano.start), XF.in2d);
+    P.headers.forEach((t, i) => ws.set(3, i + 1, t, XF.h2));
+    ['Datas previstas', 'Status', 'Responsável', 'Critério de avanço atingido?', 'Resultado / evidência'].forEach((t, i) => ws.set(3, 7 + i, t, XF.h2));
+    const f = (off) => { const [y, mo, d] = S.plano.start.split('-').map(Number); const x = new Date(y, mo - 1, d + off); return `${pad2(x.getDate())}/${pad2(x.getMonth() + 1)}`; };
+    P.rows.forEach((r, i) => {
+      const row = 4 + i, st = S.plano.steps[i];
+      r.forEach((v, c) => ws.set(row, c + 1, v, XF.b2));
+      const d = parseDays(r[5]);
+      let formula = '""', cached = '';
+      if (d) {
+        const t1 = `TEXT($B$2+${d[0] - 1},"dd/mm")`, t2 = `TEXT($B$2+${d[1] - 1},"dd/mm")`;
+        formula = `IF($B$2="","",${d[0] === d[1] ? t1 : `${t1}&" → "&${t2}`})`;
+        if (S.plano.start) cached = d[0] === d[1] ? f(d[0] - 1) : `${f(d[0] - 1)} → ${f(d[1] - 1)}`;
+      }
+      ws.set(row, 7, { f: formula, v: cached }, XF.calc2);
+      ws.set(row, 8, st.status, XF.in2).set(row, 9, st.owner, XF.in2).set(row, 10, st.crit, XF.in2c).set(row, 11, st.result, XF.in2);
+    });
+    const dr = 4 + P.rows.length + 1;
+    ws.set(dr, 1, 'Decisão final (etapa 7):', { font: { name: 'Calibri', sz: 11, b: true }, v: 'center' });
+    ws.set(dr, 2, S.plano.steps[P.rows.length - 1].decision, XF.in2);
+    [18, 25, 48, 32, 42, 18, 18, 18, 22, 22, 50].forEach((w, i) => ws.width(i + 1, i + 1, w));
+    ws.list(`H4:H${3 + P.rows.length}`, STATUS_PLANO.map((s) => s.v));
+    ws.list(`J4:J${3 + P.rows.length}`, CRITERIO_ATINGIDO.filter(Boolean));
+    ws.list(`B${dr}`, DECISOES.filter(Boolean));
+    ws.freeze = { row: 4, col: 1 };
+  }
+
+  /* ---------------- Fontes ---------------- */
+  {
+    const F = SEED.fontes;
+    const ws = wb.addSheet('Fontes');
+    ws.set(1, 1, F.title, XF.t2).merge(1, 1, 1, 6).height(1, 26);
+    F.headers.forEach((t, i) => ws.set(3, i + 1, t, XF.h2));
+    ws.set(3, 5, 'Verificação (Fase 1)', XF.h2).set(3, 6, 'Notas / data de acesso', XF.h2);
+    F.rows.forEach((r, i) => {
+      const row = 4 + i, v = FONTES_FASE1[i];
+      r.forEach((t, c) => ws.set(row, c + 1, t, XF.b2));
+      ws.set(row, 5, v ? `${v.tag.toUpperCase()}: ${v.text}` : '', XF.b2);
+      ws.set(row, 6, S.fontes.notes[String(i)] || '', XF.in2);
+    });
+    S.fontes.extra.forEach((f, i) => {
+      const row = 4 + F.rows.length + i;
+      ws.set(row, 1, f.tema, XF.in2).set(row, 2, f.fonte, XF.in2).set(row, 3, f.sustenta, XF.in2).set(row, 4, f.url, XF.in2).set(row, 5, f.status, XF.in2);
+      const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f.date);
+      ws.set(row, 6, d ? `Acessada em ${d[3]}/${d[2]}/${d[1]}` : '', XF.in2);
+    });
+    [18, 32, 70, 85, 70, 34].forEach((w, i) => ws.width(i + 1, i + 1, w));
+    ws.freeze = { row: 4, col: 1 };
+  }
+
+  /* ---------------- Pesquisa documental ---------------- */
+  {
+    const Q = SEED.pesquisa;
+    const ws = wb.addSheet('Pesquisa documental');
+    ws.zoom = 85;
+    ws.set(1, 1, Q.title, XF.t2).merge(1, 1, 1, 14).height(1, 26);
+    ws.set(2, 1, Q.subtitle, XF.warn2).merge(2, 1, 2, 14).height(2, 42);
+    Q.headers.forEach((t, i) => ws.set(4, i + 1, t, XF.h2));
+    ['Responsável e custódia dos dados', 'Nº e perfil dos participantes', 'Custo máximo e recursos', 'Prazo', 'Limiar para continuar/parar', 'Anotações e evidências humanas'].forEach((t, i) => ws.set(4, 9 + i, t, XF.h2));
+    ws.height(4, 54);
+    const list = validationIdeas();
+    list.forEach((it, i) => {
+      const r = 5 + i, row = Q.rows.find((x) => x.id === it.id), pq = getPesq(it.id);
+      ws.set(r, 1, it.id, XF.b2c).set(r, 2, row ? row.short : ideaName(it.id), XF.b2).set(r, 3, row ? row.prelim : '—', XF.b2c);
+      ws.set(r, 4, row ? row.found : 'Ainda sem pesquisa documental (ideia adicionada pela equipe).', XF.b2).set(r, 5, row ? row.gap : '—', XF.b2).set(r, 6, row ? row.next : 'Defina o próximo teste na aba Matriz de validação.', XF.b2);
+      ws.set(r, 7, pq.status, XF.in2).set(r, 8, row ? row.report : '', XF.b2);
+      ['owner', 'people', 'budget', 'deadline', 'threshold', 'notes'].forEach((k, j) => ws.set(r, 9 + j, pq[k], XF.in2));
+    });
+    const last = 4 + list.length;
+    [7, 34, 30, 62, 55, 70, 38, 48, 28, 30, 30, 18, 34, 44].forEach((w, i) => ws.width(i + 1, i + 1, w));
+    ws.list(`G5:G${last}`, STATUS_VALIDACAO.map((s) => s.v));
+    ws.freeze = { row: 5, col: 1 };
+    ws.filter = `A4:N${last}`;
+  }
+
+  /* ---------------- Registro de entrevistas ---------------- */
+  {
+    const ws = wb.addSheet('Registro de entrevistas');
+    ws.set(1, 1, 'Registro de entrevistas e testes', XF.t2).merge(1, 1, 1, 12).height(1, 26);
+    ws.set(2, 1, 'Uma linha por entrevista/teste, a partir do modelo em branco da Fase 4. Separe fato observado, relato do participante e interpretação. Não registre dados confidenciais.', XF.warn2).merge(2, 1, 2, 12).height(2, 32);
+    const labels = FICHA_LABELS;
+    ws.set(4, 1, 'Ficha', XF.h2);
+    FICHA_KEYS.forEach((k, i) => ws.set(4, 2 + i, labels[k], XF.h2));
+    ws.height(4, 48);
+    S.fichas.forEach((f, n) => {
+      const r = 5 + n;
+      ws.set(r, 1, n + 1, XF.b2c);
+      FICHA_KEYS.forEach((k, i) => {
+        if (k === 'date') ws.set(r, 2 + i, XLSX_MIN.excelDate(f.date), XF.in2d);
+        else ws.set(r, 2 + i, f[k], XF.in2);
+      });
+    });
+    ws.width(1, 1, 8);
+    FICHA_KEYS.forEach((k, i) => ws.width(2 + i, 2 + i, k === 'date' || k === 'mode' || k === 'commit' ? 18 : k === 'ids' || k === 'who' ? 22 : 38));
+    if (S.fichas.length) { ws.list(`D5:D${4 + S.fichas.length}`, MODALIDADES.filter(Boolean)); }
+    ws.freeze = { row: 5, col: 2 };
+  }
+  return wb;
+}
+
+function exportXlsx() {
+  try {
+    const blob = buildWorkbook().toBlob();
+    downloadBlob(`pesquisa-ideias-will-lucas_preenchida_${stamp()}.xlsx`, blob);
+    toast('Excel gerado com as abas e os dados atuais. Nota final e ranking saem como fórmulas.', { type: 'ok', ms: 5200 });
+  } catch (e) {
+    console.error(e);
+    toast('Não foi possível gerar o Excel: ' + (e && e.message ? e.message : e), { type: 'err', ms: 7000 });
+  }
+}
+
+/* ---------------- backup JSON ---------------- */
+function exportBackup() {
+  S.meta.lastBackupAt = nowIso();
+  const payload = Object.assign({}, S, { exportedAt: S.meta.lastBackupAt });
+  downloadBlob(`backup-pesquisa-ideias_${stamp()}.json`, new Blob([JSON.stringify(payload, null, 1)], { type: 'application/json' }));
+  saveNow();
+  updateBackupPip();
+  toast('Backup baixado. Guarde o arquivo: ele restaura tudo em qualquer navegador.', { type: 'ok', ms: 5200 });
+}
+function summarize(st) {
+  const scored = st.ideas.filter((i) => i.s.every((v) => v != null)).length;
+  return `${scored} ideia(s) pontuada(s), ${st.pains.filter((p) => p.text.trim()).length} dor(es), ${st.fichas.length} ficha(s)`;
+}
+function applyState(next, msg) {
+  S = next;
+  S.meta.changedAt = nowIso();
+  saveNow();
+  renderCurrent();
+  updateBackupPip();
+  toast(msg, { type: 'ok', ms: 5200 });
+}
+async function importBackupFile(file) {
+  if (!file) return;
+  let parsed;
+  try { parsed = JSON.parse(await file.text()); } catch (e) { toast('Arquivo inválido: não é um JSON legível.', { type: 'err' }); return; }
+  if (!isObj(parsed) || parsed.app !== APP_ID) { toast('Este arquivo não é um backup desta planilha.', { type: 'err', ms: 6000 }); return; }
+  const next = sanitizeState(parsed);
+  const when = parsed.exportedAt ? new Date(parsed.exportedAt).toLocaleString('pt-BR') : 'data desconhecida';
+  const ok = await confirmDlg({
+    title: 'Carregar este backup?',
+    message: [`Backup de ${when}: ${summarize(next)}.`, `Os dados atuais (${summarize(S)}) serão substituídos. Você poderá desfazer logo em seguida.`],
+    ok: 'Carregar backup', danger: true,
+  });
+  if (!ok) return;
+  const prev = JSON.stringify(S);
+  applyState(next, 'Backup carregado.');
+  toast('Backup carregado.', { type: 'ok', ms: 9000, action: 'Desfazer', onAction: () => applyState(sanitizeState(JSON.parse(prev)), 'Dados anteriores restaurados.') });
+}
+async function resetAll() {
+  const ok = await confirmDlg({
+    title: 'Apagar todos os dados preenchidos?',
+    message: ['Notas, pesos, dores, anotações, fichas e status voltam ao estado inicial da planilha.', 'Se ainda não baixou um backup, baixe antes. Você poderá desfazer logo em seguida.'],
+    ok: 'Apagar tudo', danger: true,
+  });
+  if (!ok) return;
+  const prev = JSON.stringify(S);
+  const keepIntro = S.ui.introDismissed;
+  const fresh = defaultState();
+  fresh.ui.introDismissed = keepIntro;
+  applyState(fresh, 'Dados apagados.');
+  toast('Dados apagados.', { type: 'ok', ms: 9000, action: 'Desfazer', onAction: () => applyState(sanitizeState(JSON.parse(prev)), 'Dados restaurados.') });
+}
+function printTab() {
+  try { window.print(); } catch (e) { toast('A impressão está bloqueada neste ambiente. Use "Exportar Excel" ou o menu do navegador.', { type: 'err', ms: 6000 }); }
+}
+
+/* ==========================================================================
+   9. INICIALIZAÇÃO: barra superior, abas, avisos, roteamento
+   ========================================================================== */
+let currentTab = 'analise';
+
+function renderCurrent() {
+  const panel = $('#panel');
+  let node;
+  try {
+    node = RENDERERS[currentTab]();
+  } catch (e) {
+    console.error(e);
+    node = h('div', null, callout('warn', 'Não foi possível montar esta aba (' + (e && e.message ? e.message : e) + '). Seus dados estão preservados: baixe um backup e recarregue a página.'));
+  }
+  panel.replaceChildren(node);
+  flushAutosize();
+}
+
+function showTab(id) {
+  if (!TAB_IDS.includes(id)) id = 'analise';
+  currentTab = id;
+  S.ui.tab = id;
+  $$('.tab').forEach((b) => {
+    const on = b.dataset.tab === id;
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+    b.tabIndex = on ? 0 : -1;
+    if (on && b.scrollIntoView) b.scrollIntoView({ inline: 'center', block: 'nearest' });
+  });
+  renderCurrent();
+  try { history.replaceState(null, '', '#' + id); } catch (e) { /* ambientes com iframe restrito */ }
+  window.scrollTo(0, 0);
+}
+
+function syncSticky() {
+  const top = $('#topbar'), tabs = $('#tabs');
+  if (!top || !tabs) return;
+  const th = top.offsetHeight, tb = tabs.offsetHeight;
+  const root = document.documentElement.style;
+  root.setProperty('--topbar-h', th + 'px');
+  root.setProperty('--sticky-h', th + tb + 'px');
+}
+
+function renderNotices() {
+  const box = $('#notices');
+  const items = [];
+  if (!STORAGE_OK) {
+    items.push(h('div', { class: 'callout warn no-print', style: { margin: '8px 16px', fontStyle: 'normal' } },
+      h('b', { text: 'Atenção: este navegador bloqueou o armazenamento local. ' }),
+      'Você pode preencher normalmente, mas as alterações não ficam salvas se a página for fechada. Use "Baixar backup" (ou "Exportar Excel") antes de sair — e "Mais → Carregar backup" para continuar depois.'));
+  }
+  if (!S.ui.introDismissed) {
+    items.push(h('div', { class: 'callout info no-print', style: { margin: '8px 16px' } },
+      h('b', { text: 'Versão editável da planilha. ' }),
+      'Preencha os campos amarelos (texto azul); o que é cinza é calculado. Tudo é salvo automaticamente ',
+      h('b', { text: 'somente neste navegador' }),
+      ' — use "Baixar backup" para guardar uma cópia ou enviar ao parceiro, e "Exportar Excel" para voltar ao .xlsx. ',
+      h('button', { type: 'button', class: 'btn small line', style: { marginLeft: '8px' }, text: 'Entendi', onclick: () => { S.ui.introDismissed = true; touch(); renderNotices(); syncSticky(); } })));
+  }
+  box.replaceChildren(...items);
+}
+
+function buildChrome() {
+  const fileInput = h('input', { type: 'file', accept: '.json,application/json', hidden: true, id: 'file-import' });
+  fileInput.addEventListener('change', () => {
+    const f = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    importBackupFile(f);
+  });
+  const menu = h('details', { class: 'menu' });
+  const closeMenu = () => { menu.open = false; };
+  menu.append(
+    h('summary', { class: 'btn ghost', text: 'Mais' }),
+    h('div', { class: 'menu-list' },
+      h('button', { type: 'button', text: 'Carregar backup (.json)…', onclick: () => { closeMenu(); fileInput.click(); } }),
+      h('button', { type: 'button', text: 'Imprimir esta aba', onclick: () => { closeMenu(); printTab(); } }),
+      h('hr'),
+      h('button', { type: 'button', class: 'danger', text: 'Apagar todos os dados…', onclick: () => { closeMenu(); resetAll(); } })));
+  document.addEventListener('click', (e) => { if (menu.open && !menu.contains(e.target)) closeMenu(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.open) closeMenu(); });
+
+  $('#topbar').replaceChildren(
+    h('div', { class: 'brand' }, h('h1', { text: 'Pesquisa de ideias — Will & Lucas' }), h('span', { class: 'tag', text: 'versão editável' })),
+    h('div', { class: 'actions' },
+      h('span', { id: 'save-status', class: 'save-status' }),
+      h('button', { type: 'button', id: 'btn-backup', class: 'btn primary', text: 'Baixar backup', onclick: exportBackup }),
+      h('button', { type: 'button', id: 'btn-xlsx', class: 'btn ghost', text: 'Exportar Excel', onclick: exportXlsx }),
+      menu, fileInput));
+
+  const nav = $('#tabs');
+  nav.setAttribute('role', 'tablist');
+  nav.setAttribute('aria-label', 'Abas da planilha');
+  nav.replaceChildren(...TABS.map((t) => h('button', {
+    type: 'button', class: 'tab', role: 'tab', data: { tab: t.id }, 'aria-selected': 'false',
+    onclick: () => showTab(t.id),
+  }, t.label, t.isNew ? h('span', { class: 'new', text: 'novo' }) : null)));
+  nav.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const i = TAB_IDS.indexOf(currentTab) + (e.key === 'ArrowRight' ? 1 : -1);
+    const next = TAB_IDS[(i + TAB_IDS.length) % TAB_IDS.length];
+    showTab(next);
+    const b = $(`.tab[data-tab="${next}"]`);
+    if (b) b.focus();
+    e.preventDefault();
+  });
+}
+
+function boot() {
+  S = loadState();
+  buildChrome();
+  renderNotices();
+  syncSticky();
+  window.addEventListener('resize', syncSticky);
+  if (typeof ResizeObserver === 'function') {
+    const ro = new ResizeObserver(syncSticky);
+    ro.observe($('#topbar'));
+    ro.observe($('#tabs'));
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncSticky);
+
+  const fromHash = decodeURIComponent((location.hash || '').slice(1));
+  showTab(TAB_IDS.includes(fromHash) ? fromHash : S.ui.tab);
+  window.addEventListener('hashchange', () => {
+    const id = decodeURIComponent((location.hash || '').slice(1));
+    if (TAB_IDS.includes(id) && id !== currentTab) showTab(id);
+  });
+
+  if (!STORAGE_OK) setSaveStatus('error');
+  else if (S.meta.changedAt) setSaveStatus('saved', 'Dados recuperados deste navegador (última alteração: ' + new Date(S.meta.changedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) + ')');
+  else setSaveStatus('idle');
+  updateBackupPip();
+
+  window.addEventListener('pagehide', saveNow);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveNow(); });
+  window.addEventListener('beforeunload', (e) => {
+    saveNow();
+    if (!STORAGE_OK && S.meta.changedAt && (!S.meta.lastBackupAt || S.meta.changedAt > S.meta.lastBackupAt)) { e.preventDefault(); e.returnValue = ''; }
+  });
+  window.addEventListener('error', (e) => { console.error(e.error || e.message); toast('Ocorreu um erro inesperado. Seus dados continuam salvos; se algo parecer errado, baixe um backup e recarregue.', { type: 'err', ms: 7000 }); });
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+})();
+</script>
+</body>
+</html>
