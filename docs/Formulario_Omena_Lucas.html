@@ -186,6 +186,7 @@ footer{margin:22px 0 8px;color:var(--muted);font-size:.82rem;text-align:center}
       <div class="acoes">
         <button class="btn btn-primary" id="btnSalvar" type="button">Salvar agora (navegador)</button>
         <button class="btn btn-ghost" id="btnExportar" type="button">Baixar backup JSON</button>
+        <button class="btn btn-ghost" id="btnBaixarHTML" type="button">⬇ Baixar este arquivo (HTML)</button>
         <button class="btn btn-danger" id="btnLimpar" type="button">Limpar dados salvos</button>
       </div>
       <div class="abas" role="tablist">
@@ -653,6 +654,16 @@ footer{margin:22px 0 8px;color:var(--muted);font-size:.82rem;text-align:center}
       URL.revokeObjectURL(a.href);
     }
 
+    function baixarHTML(){
+      const conteudo = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([conteudo], {type: 'text/html;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Formulario_Omena_Lucas.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
     // ===== UI =====
     function atualizarStatus(){
       const status = document.getElementById('status');
@@ -780,6 +791,7 @@ footer{margin:22px 0 8px;color:var(--muted);font-size:.82rem;text-align:center}
         mostrarToast('Dados salvos neste navegador.', 'ok');
       });
       document.getElementById('btnExportar')?.addEventListener('click', exportarJSON);
+      document.getElementById('btnBaixarHTML')?.addEventListener('click', baixarHTML);
       document.getElementById('btnLimpar')?.addEventListener('click', limparDados);
 
       window.addEventListener('beforeunload', salvarTudo);
