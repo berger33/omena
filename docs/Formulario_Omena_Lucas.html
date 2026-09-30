@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12213a">
+  <title>Omena — Pesquisa de Ideias (Will &amp; Lucas) | Formulário completo</title>
+  <style>
+:root{
+  --bg:#f4f7fb; --card:#fff; --ink:#0e1726; --muted:#5a6b81; --line:#d7e0ec;
+  --accent:#1e5eff; --accent-ink:#fff; --ok:#0f9d58; --warn:#b26a00; --danger:#b3261e;
+  --radius:14px; --shadow:0 6px 20px rgba(20,40,80,.08);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size:16px; line-height:1.45;
+  padding:12px 12px 36px;
+}
+input,select,textarea,button{font:inherit;color:inherit}
+.container{max-width:1020px;margin:0 auto}
+
+/* Cabeçalho */
+.topo{
+  background:linear-gradient(135deg,#12213a,#1e5eff 55%,#5f8dff);
+  color:#fff;border-radius:var(--radius);padding:16px 14px;margin-bottom:14px;box-shadow:var(--shadow);
+}
+.topo h1{margin:0 0 6px;font-size:clamp(1.3rem,5.4vw,2.05rem);line-height:1.2}
+.topo .sub{margin:0;opacity:.92;font-size:clamp(.83rem,3.2vw,1.02rem)}
+.logo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{
+  width:44px;height:44px;border-radius:12px;background:#fff;color:#1e5eff;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.78rem;letter-spacing:.04em;flex:0 0 auto;
+}
+
+/* Barra de status / ações */
+.barra{
+  display:flex;flex-direction:column;gap:10px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;margin-bottom:12px;box-shadow:var(--shadow);
+}
+.barra .salvo{color:var(--muted);font-size:.86rem}
+.acoes{display:flex;flex-direction:column;gap:10px}
+.btn{
+  appearance:none;border:1px solid transparent;border-radius:12px;cursor:pointer;
+  padding:12px 14px;font-weight:600;font-size:.95rem;line-height:1.25;
+  transition:.18s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;text-align:center;white-space:normal;
+  touch-action:manipulation;-webkit-tap-highlight-color:rgba(30,94,255,.18);
+}
+.btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 18px rgba(30,94,255,.22)}
+.btn-primary:hover{filter:brightness(1.05)}
+.btn-ghost{background:#fff;color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{border-color:#a9b7cc}
+.btn-danger{background:#fff;color:var(--danger);border-color:#f0c2be}
+.btn-danger:hover{background:#fff1f0}
+.btn-mini{
+  min-height:40px;padding:8px 12px;font-size:.85rem;border-radius:10px;flex:0 0 auto;
+}
+.btn:active{transform:translateY(1px)}
+
+/* Navegação por abas (rolagem horizontal no celular) */
+.nav{
+  display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin-bottom:6px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.nav::-webkit-scrollbar{display:none}
+.aba{
+  flex:0 0 auto;min-height:48px;
+  background:#e6ecf6;border:1px solid var(--line);color:#2a3c56;
+  border-radius:999px;padding:11px 16px;font-weight:600;font-size:.92rem;cursor:pointer;
+  white-space:nowrap;touch-action:manipulation;-webkit-tap-highlight-color:rgba(30,94,255,.18);
+}
+.aba.ativa{background:var(--accent);color:#fff;border-color:transparent}
+
+/* Seções e cartões */
+.form-section{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 14px;margin:14px 0;box-shadow:var(--shadow);
+}
+.form-section h2{margin:0 0 10px;font-size:1.18rem}
+.form-section h3{margin:16px 0 10px;font-size:1.02rem}
+.linha{display:flex;flex-direction:column;gap:5px;margin:10px 0}
+.linha label,.rot{font-weight:600;font-size:.92rem}
+.grid-2{display:grid;grid-template-columns:1fr;gap:12px}
+.full{width:100%}
+input[type="text"],input[type="number"],input[type="date"],input[type="url"],select,textarea{
+  width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;
+  padding:11px 12px;font-size:16px;min-height:46px;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+textarea{resize:vertical;min-height:84px;line-height:1.5}
+small{color:var(--muted);font-size:.85rem;display:block;line-height:1.4}
+.note{
+  background:#eef4ff;border-left:4px solid var(--accent);border-radius:8px;
+  padding:10px 12px;margin:10px 0;font-size:.88rem;
+}
+.note.warn{background:#fff7e8;border-left-color:var(--warn)}
+.hidden{display:none !important}
+.view{display:block}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,148px),1fr));gap:10px;margin:12px 0}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 10px;text-align:center}
+.kpi .n{font-size:1.55rem;font-weight:800;color:var(--accent);line-height:1.1}
+.kpi .l{font-size:.78rem;color:var(--muted);margin-top:4px}
+
+/* Tabelas (rolagem horizontal no celular) */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:10px 0}
+table{border-collapse:collapse;min-width:680px;width:100%}
+th,td{border:1px solid var(--line);padding:8px 10px;font-size:.83rem;text-align:left;vertical-align:top}
+th{background:#eef2f8;position:sticky;top:0}
+td.num,th.num{text-align:center}
+
+/* Cartões de ideias / dores / etc. */
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:12px;
+  padding:14px 12px;margin:12px 0;
+}
+.card-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.chip{
+  background:#0e1726;color:#fff;border-radius:999px;padding:5px 12px;
+  font-size:.8rem;font-weight:700;flex:0 0 auto;
+}
+.chip.azul{background:var(--accent)}
+.chip.cinza{background:#e6ecf6;color:#2a3c56}
+.chip.verde{background:var(--ok)}
+.chip.laranja{background:var(--warn)}
+.chip.vermelho{background:var(--danger)}
+.notas-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,158px),1fr));gap:10px;margin:10px 0}
+.campo-curto label{font-size:.78rem;font-weight:600;display:block;margin-bottom:4px}
+.campo-curto select{min-height:44px;padding:8px 10px}
+.nota-final{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  background:#f2f6fd;border:1px dashed #b9c9e4;border-radius:10px;padding:10px 12px;margin:8px 0;
+  font-size:.92rem;
+}
+.nota-final .valor{font-size:1.25rem;font-weight:800;color:var(--accent)}
+.badge-ok{background:#e3f6ec;color:#0b6b3f;border:1px solid #b6e6cd;border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:700}
+.badge-off{background:#eef2f8;color:#5a6b81;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:700}
+
+/* details/summary */
+details{
+  border:1px solid var(--line);border-radius:12px;margin:10px 0;background:#fff;
+}
+summary{
+  padding:12px 14px;font-weight:600;cursor:pointer;list-style:none;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;
+}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'▾';color:var(--muted);flex:0 0 auto}
+details[open] summary::after{content:'▴'}
+.detalhe-corpo{padding:0 12px 12px}
+.pergunta{background:#f7f9fd;border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+.pergunta .p{font-weight:600}
+.pergunta .d{color:var(--muted);font-size:.83rem;margin:4px 0 8px}
+
+/* Pesos */
+.pesos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr));gap:10px}
+
+/* Fontes */
+.fonte-url{
+  display:inline-block;margin-top:6px;color:var(--accent);font-weight:600;
+  word-break:break-all;font-size:.86rem;
+}
+
+/* Progresso */
+.progresso{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom));
+  width:min(92vw,420px);background:#0e1726;color:#fff;
+  padding:10px 12px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+  z-index:50;display:none;text-align:center;font-size:.92rem;
+}
+.progresso .bar{height:8px;background:#2c3d57;border-radius:999px;overflow:hidden;margin-top:8px}
+.progresso .bar > div{height:100%;width:0;background:linear-gradient(90deg,#5f8dff,#7cf3c4);transition:width .25s ease}
+
+/* Toast */
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%) translateY(20px);
+  bottom:calc(18px + env(safe-area-inset-bottom));
+  background:#0e1726;color:#fff;padding:12px 16px;border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:60;opacity:0;transition:.25s ease;
+  pointer-events:none;max-width:min(92vw,520px);text-align:center;font-size:.92rem;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--ok)}
+.toast.err{background:var(--danger)}
+
+footer{margin:22px 0 8px;color:var(--muted);font-size:.82rem;text-align:center}
+
+/* ===== Celular em pé (vertical): tudo em coluna única ===== */
+@media (max-width:640px){
+  .btn{width:100%}
+  .btn-mini{width:auto}
+  .topo{padding:14px 12px}
+  .form-section{padding:14px 12px}
+  .form-section h2{font-size:1.12rem}
+  table{min-width:640px}
+}
+
+/* ===== Telas maiores ===== */
+@media (min-width:641px){
+  body{padding:20px 18px 36px}
+  .topo{padding:22px}
+  .barra{flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .acoes{flex-direction:row;flex-wrap:wrap}
+  .acoes .btn{flex:1 1 190px;width:auto;white-space:nowrap}
+  .form-section{padding:22px}
+  .form-section h2{font-size:1.35rem}
+  .grid-2{grid-template-columns:1fr 1fr}
+  .linha{flex-direction:row;align-items:flex-start;gap:12px}
+  .linha label{width:180px;flex:0 0 180px;padding-top:12px}
+}
+
+/* Impressão (gerar PDF direto do navegador) */
+@media print{
+  body{background:#fff;padding:0}
+  .no-print, .barra, .nav, .toast, .progresso, footer{display:none !important}
+  .topo{background:#fff;color:#000;box-shadow:none;border:1px solid #ccc}
+  .form-section,.card,details{box-shadow:none;border:1px solid #bbb;page-break-inside:avoid}
+  details{display:block}
+  details > *:not(summary){display:block !important}
+}
+@page{margin:14mm}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topo">
+      <div class="logo-row">
+        <div class="logo">OMENA</div>
+        <div>
+          <h1>Pesquisa de Ideias — Will &amp; Lucas</h1>
+          <p class="sub">Formulário completo da planilha · 10 abas · Ideias, Critérios, Roteiro, Dores, Matriz, Plano de ação, Pesquisa documental, Fontes · Mobile</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="barra no-print">
+      <div class="salvo" id="status">Salvo automaticamente neste navegador.</div>
+      <div class="acoes">
+        <button class="btn btn-primary" id="btnSalvar" type="button">Salvar agora (navegador)</button>
+        <button class="btn btn-ghost" id="btnExportar" type="button">Baixar backup JSON</button>
+        <button class="btn btn-ghost" id="btnBaixarHTML" type="button">⬇ Baixar este arquivo (HTML)</button>
+        <button class="btn btn-danger" id="btnLimpar" type="button">Limpar dados salvos</button>
+      </div>
+    </section>
+
+    <nav class="nav no-print" id="nav" role="tablist"></nav>
+
+    <main id="main"></main>
+
+    <footer>
+      Formulário offline — os dados ficam salvos apenas neste navegador (localStorage) até você baixar o backup JSON.
+      Contém todas as informações da planilha “pesquisa-ideias-will-lucas_validacao_documental.xlsx”.
+    </footer>
+  </div>
+
+  <div class="progresso" id="progresso">
+    <div>Salvando alterações...</div>
+    <div class="bar"><div id="progressoBar"></div></div>
+  </div>
+
+  <script>
+    // ==================== DADOS DA PLANILHA ====================
+    const DADOS = {"pesos":{"dor":3.0,"gasto":3.0,"mercado":2.0,"concorrencia":1.0,"regulacao":1.0,"mvp":2.0,"recorrencia":2.0},"ideias":[{"num":"1","area":"Lab / Química","nome":"Controle de reagentes e estoque (validades, alertas, FISPQ, etiquetas com QR code)"},{"num":"2","area":"Lab / Química","nome":"Rastreio de amostras: recebimento → análise → laudo, com histórico completo"},{"num":"3","area":"Lab / Química","nome":"Emissão automática de laudos e certificados de análise a partir dos resultados"},{"num":"4","area":"Lab / Química","nome":"Gestão de equipamentos: calibração, manutenção e verificação, com agenda e alertas"},{"num":"5","area":"Lab / Química","nome":"Gestão da qualidade: POPs, treinamentos, não conformidades e auditorias"},{"num":"6","area":"Lab / Química","nome":"Controle estatístico e incerteza de medição (labs acreditados)"},{"num":"7","area":"Lab / Química","nome":"Resíduos químicos e produtos controlados: conformidade e documentação obrigatória"},{"num":"8","area":"Lab / Química","nome":"Captura automática de dados de instrumentos (balança, pHmetro etc.), sem redigitar"},{"num":"9","area":"Lab / Química","nome":"Portal do cliente para labs prestadores: solicitar análise, acompanhar, baixar laudo"},{"num":"10","area":"Lab / Química","nome":"Gestão de formulações para pequenas indústrias (versões de receita, custo, ficha técnica)"},{"num":"11","area":"IA","nome":"Assistente que responde perguntas sobre o manual de qualidade e os POPs da empresa"},{"num":"12","area":"IA","nome":"Leitura automática de laudos de fornecedores em PDF, com conferência e alertas"},{"num":"13","area":"QA (experiência do Will)","nome":"Validação de sistemas computadorizados e testes automatizados como serviço"},{"num":"14","area":"Cannabis","nome":"Gestão para associações: pacientes, produção, rastreabilidade e prestação de contas"},{"num":"15","area":"Cannabis","nome":"Análise de canabinoides e controle de qualidade como serviço"},{"num":"16","area":"Pequenos negócios","nome":"Sistema com WhatsApp e agendamento (pet shops, tabacarias, clínicas)"},{"num":"17","area":"Nova ideia","nome":""},{"num":"18","area":"Nova ideia","nome":""}],"exemplo":{"area":"EXEMPLO","nome":"Exemplo (não conta no ranking): sistema fictício X","notas":{"dor":"4","gasto":"3","mercado":"3","concorrencia":"2","regulacao":"3","mvp":"4","recorrencia":"5"},"obs":"Linha de exemplo do formato esperado"},"criterios":[{"nome":"Dor real e frequente","pergunta":"Isso incomoda de verdade e acontece com frequência?","nota1":"Incômodo raro; as pessoas convivem bem com isso","nota5":"Acontece todo dia/semana e gera retrabalho, erro ou prejuízo"},{"nome":"Já gastam tempo/dinheiro com isso","pergunta":"Como resolvem hoje e quanto custa?","nota1":"Ninguém gasta nada nem se preocupa em resolver","nota5":"Já pagam por sistema, planilha cara ou horas de funcionário"},{"nome":"Mercado acessível (nº de clientes + acesso)","pergunta":"Quantos clientes existem e vocês chegam neles?","nota1":"Poucos clientes e sem contato nenhum","nota5":"Muitos clientes e vocês têm acesso direto (rede do Lucas, listas públicas)"},{"nome":"Pouca concorrência","pergunta":"Já existe solução boa e barata?","nota1":"Vários sistemas maduros e baratos","nota5":"Quase ninguém atende esse nicho, ou atende mal"},{"nome":"Pouca regulação / risco","pergunta":"Erro do sistema gera problema legal ou de segurança?","nota1":"Exige certificação/validação pesada e erro é grave","nota5":"Sem exigência regulatória; erro tem baixo impacto"},{"nome":"MVP rápido de fazer","pergunta":"Dá para ter uma versão usável em poucas semanas?","nota1":"Meses de trabalho, muitas integrações","nota5":"Versão simples e útil em 2 a 4 semanas"},{"nome":"Receita recorrente","pergunta":"O cliente pagaria mensalidade?","nota1":"Venda única, uso esporádico","nota5":"Uso contínuo; mensalidade natural"}],"roteiro":[{"bloco":"1. Abertura","tempo":"2 min","pergunta":"Explicar: 'Não vou te vender nada; quero entender como é o seu dia e onde trava.' Combinar: sem nomes de clientes nem dados internos da empresa.","descobrir":"Deixar ele confortável e definir o limite de confidencialidade"},{"bloco":"2. Contexto","tempo":"5 min","pergunta":"Em que tipo de empresa/laboratório você trabalha e o que ele faz (análises, produção, controle de qualidade)?","descobrir":"Setor exato e tipo de operação"},{"bloco":"2. Contexto","tempo":"","pergunta":"Quantas pessoas no lab? Quantas amostras/análises por semana, mais ou menos?","descobrir":"Porte e volume"},{"bloco":"2. Contexto","tempo":"","pergunta":"Que sistemas ou ferramentas vocês usam hoje (planilha, sistema, papel, WhatsApp)?","descobrir":"Como o trabalho é organizado hoje"},{"bloco":"3. Dia a dia","tempo":"10 min","pergunta":"Me conta o seu último dia de trabalho, do começo ao fim.","descobrir":"Fluxo real do trabalho, sem filtro"},{"bloco":"3. Dia a dia","tempo":"","pergunta":"O que você precisou refazer ou digitar duas vezes nesta semana?","descobrir":"Retrabalho (sinal forte de dor)"},{"bloco":"3. Dia a dia","tempo":"","pergunta":"O que você perdeu tempo procurando (documento, resultado, lote, certificado)?","descobrir":"Falhas de organização e rastreio"},{"bloco":"3. Dia a dia","tempo":"","pergunta":"O que ainda está em planilha, papel ou WhatsApp e não deveria?","descobrir":"Candidatos a automação"},{"bloco":"4. Dores e consequências","tempo":"10 min","pergunta":"Qual foi o último problema que apareceu numa auditoria, cliente ou análise? O que aconteceu?","descobrir":"Dores com consequência real"},{"bloco":"4. Dores e consequências","tempo":"","pergunta":"Já houve um erro que custou dinheiro, lote perdido ou retrabalho grande? Como foi?","descobrir":"Tamanho do prejuízo (base para preço)"},{"bloco":"4. Dores e consequências","tempo":"","pergunta":"O que mais consome o seu tempo por semana e que uma pessoa a mais no lab resolveria?","descobrir":"Ranking de dores por tempo"},{"bloco":"5. Dinheiro e decisão","tempo":"8 min","pergunta":"Vocês já pagam por algum sistema? Quanto, mais ou menos?","descobrir":"Disposição a pagar e faixa de preço"},{"bloco":"5. Dinheiro e decisão","tempo":"","pergunta":"Quem decide comprar um sistema ou ferramenta nova? Como é esse processo?","descobrir":"Quem paga e quanto demora vender"},{"bloco":"5. Dinheiro e decisão","tempo":"","pergunta":"Já tentaram implantar algum sistema e abandonaram? Por quê?","descobrir":"Motivos de fracasso a evitar"},{"bloco":"6. Rede e mercado","tempo":"8 min","pergunta":"Quem mais tem esse problema? Conhece laboratórios pequenos que trabalham sem sistema?","descobrir":"Tamanho e perfil do mercado"},{"bloco":"6. Rede e mercado","tempo":"","pergunta":"Você consegue me apresentar 3 pessoas do setor para eu conversar 20 minutos?","descobrir":"Acesso a entrevistas (Etapa 3)"},{"bloco":"6. Rede e mercado","tempo":"","pergunta":"Onde o pessoal do setor se informa (grupos, eventos, associações, sindicatos)?","descobrir":"Canais para alcançar clientes"},{"bloco":"7. Fechamento","tempo":"2 min","pergunta":"Se você pudesse resolver uma única coisa amanhã, qual seria?","descobrir":"A dor número 1 na visão dele"},{"bloco":"7. Fechamento","tempo":"","pergunta":"Posso te mandar um resumo do que anotei para você corrigir? Combinamos uma próxima conversa?","descobrir":"Validação e próximo passo"}],"doresExemplo":{"situacao":"Exemplo: 'toda semana perco uma tarde procurando o certificado do lote na pasta'","frequencia":"Semanal","tempo":"Cerca de 4 h/semana","resolvem":"Pasta no computador + planilha","quemSofre":"Analista de qualidade","quemPaga":"Gerente do lab","ideia":"3","forca":"4"},"matriz":[{"id":"1","ideia":"Controle de reagentes e estoque (validades, alertas, FISPQ, etiquetas com QR code)","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"2","ideia":"Rastreio de amostras: recebimento → análise → laudo, com histórico completo","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"3","ideia":"Emissão automática de laudos e certificados de análise a partir dos resultados","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"4","ideia":"Gestão de equipamentos: calibração, manutenção e verificação, com agenda e alertas","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"5","ideia":"Gestão da qualidade: POPs, treinamentos, não conformidades e auditorias","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"6","ideia":"Controle estatístico e incerteza de medição (labs acreditados)","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"7","ideia":"Resíduos químicos e produtos controlados: conformidade e documentação obrigatória","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"8","ideia":"Captura automática de dados de instrumentos (balança, pHmetro etc.), sem redigitar","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"9","ideia":"Portal do cliente para labs prestadores: solicitar análise, acompanhar, baixar laudo","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"10","ideia":"Gestão de formulações para pequenas indústrias (versões de receita, custo, ficha técnica)","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"11","ideia":"Assistente que responde perguntas sobre o manual de qualidade e os POPs da empresa","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"12","ideia":"Leitura automática de laudos de fornecedores em PDF, com conferência e alertas","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"13","ideia":"Validação de sistemas computadorizados e testes automatizados como serviço","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"14","ideia":"Gestão para associações: pacientes, produção, rastreabilidade e prestação de contas","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"15","ideia":"Análise de canabinoides e controle de qualidade como serviço","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."},{"id":"16","ideia":"Sistema com WhatsApp e agendamento (pet shops, tabacarias, clínicas)","proximoTeste":"Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo."}],"plano":[{"etapa":"1. Escolha do nicho","objetivo":"Reduzir dispersão","atividade":"Escolher 1 problema principal e 1 público pagante","saida":"Hipótese de ICP + problema","criterio":"Problema ocorre semanalmente e tem custo percebido","prazo":"Dia 1"},{"etapa":"2. Entrevistas","objetivo":"Testar dor passada","atividade":"Fazer 5 conversas usando o roteiro da planilha, sem vender solução","saida":"5 relatos concretos","criterio":"≥3 relatam o mesmo problema com frequência","prazo":"Dias 2–5"},{"etapa":"3. Quantificação","objetivo":"Descobrir ROI","atividade":"Medir horas, erros, retrabalho, perdas e custo atual","saida":"Estimativa de custo da dor","criterio":"Há economia potencial claramente calculável","prazo":"Dias 5–7"},{"etapa":"4. Concorrência","objetivo":"Evitar construir commodity","atividade":"Encontrar 5 alternativas: software, planilha, terceirização ou processo manual","saida":"Mapa de alternativas","criterio":"Existe espaço por nicho, workflow ou integração","prazo":"Dias 6–8"},{"etapa":"5. Oferta","objetivo":"Testar disposição a pagar","atividade":"Propor piloto pago ou pré-venda com escopo pequeno","saida":"Oferta + preço + condições","criterio":"Alguém aceita pagar ou assinar piloto","prazo":"Dias 8–10"},{"etapa":"6. MVP concierge","objetivo":"Provar resultado antes de automatizar","atividade":"Executar o serviço manualmente/semiautomaticamente para 1 cliente","saida":"Resultado mensurável","criterio":"Cliente repete uso e recomenda/renova","prazo":"Dias 10–14"},{"etapa":"7. Decisão","objetivo":"Escolher onde investir","atividade":"Comparar evidências, não entusiasmo","saida":"Decisão de continuar, pivotar ou abandonar","criterio":"Dor + acesso + pagamento + execução viáveis","prazo":"Dia 14"}],"fontes":[{"tema":"Análises clínicas","fonte":"Anvisa — RDC 978/2025","sustenta":"Requisitos técnico-sanitários atualizados para serviços que executam exames de análises clínicas.","url":"https://www.gov.br/anvisa/pt-br/centraisdeconteudo/publicacoes/servicosdesaude/perguntas-e-respostas/p-r__978_2025_1a-versao-revisada_portal_27ago2025.pdf"},{"tema":"Validação","fonte":"Anvisa — Guia de validação de sistemas computadorizados","sustenta":"Base regulatória/técnica para processos de validação de sistemas computadorizados.","url":"https://www.gov.br/anvisa/pt-br/centraisdeconteudo/publicacoes/medicamentos/publicacoes-sobre-medicamentos/guia-de-validacao-de-sistemas-computadorizados.pdf"},{"tema":"Cannabis","fonte":"Anvisa — RDCs 1.012/2026 e 1.013/2026","sustenta":"Requisitos atuais para cultivo medicinal/farmacêutico e pesquisa, incluindo autorização e controles.","url":"https://www.gov.br/anvisa/pt-br/assuntos/medicamentos/controlados/rdcs-no-1-012-2026-e-no-1-013-2026"},{"tema":"Cannabis","fonte":"Anvisa — regras de produção de cannabis medicinal","sustenta":"Novo marco regulatório para produção e fabricação/importação de produtos de cannabis medicinal.","url":"https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa/2026/anvisa-publica-regras-para-producao-de-cannabis-medicinal/"},{"tema":"WhatsApp","fonte":"Sebrae — Venda mais com o WhatsApp","sustenta":"Contexto de uso do WhatsApp como canal de vendas, atendimento e relacionamento para pequenos negócios.","url":"https://meuatendimento.sebrae.com.br/sites/PortalSebrae/ufs/ba/artigos/venda-mais-com-o-whatsapp-estrategias-para-empresas-em-expansao%2C36ea1c09edf78910VgnVCM1000001b00320aRCRD"}],"pesquisa":[{"id":"1","ideia":"Controle de reagentes e estoque","posicao":"9 · 4,00","encontrou":"Foram encontrados módulos comerciais de estoque químico e reagentes.","lacuna":"Frequência de falta/perda, integração ao sistema atual e valor econômico não observados.","proximoTeste":"Reconstruir um episódio recente de falta, vencimento ou divergência; percorrer entrada → retirada → descarte e comparar com a ferramenta atual.","status":"PENDENTE — não executada","relatorio":"FASE2_ID01_ESTOQUE_REAGENTES.md"},{"id":"2","ideia":"Rastreio de amostras","posicao":"2 · 4,43","encontrou":"LIMS nacionais e estrangeiros oferecem rastreio de amostras e fluxos relacionados.","lacuna":"Não se sabe onde os LIMS usados pelo público falham, nem custo de integração ou troca.","proximoTeste":"Reconstituir uma amostra concluída do recebimento ao laudo e observar localização, status, transições e retrabalho.","status":"PENDENTE — não executada","relatorio":"FASE2_ID02_RASTREIO_AMOSTRAS.md"},{"id":"3","ideia":"Emissão automática de laudos/COAs","posicao":"5 · 4,29","encontrou":"Geração de relatórios/laudos aparece em diversos LIMS.","lacuna":"Formato, origem dos resultados, revisão e falha específica no segmento-alvo são desconhecidos.","proximoTeste":"Acompanhar resultado bruto → documento liberado; mapear digitação, cálculos, revisão, assinatura e correções.","status":"PENDENTE — não executada","relatorio":"FASE2_ID03_EMISSAO_LAUDOS.md"},{"id":"4","ideia":"Gestão de equipamentos","posicao":"7 · 4,14","encontrou":"Há software metrológico e módulos LIMS para equipamentos, calibração e manutenção.","lacuna":"Público comprador, lacunas dos sistemas existentes e incidência de indisponibilidade não comprovados.","proximoTeste":"Percorrer um caso recente de calibração/manutenção e verificar agenda, certificados, bloqueio e consequência.","status":"PENDENTE — não executada","relatorio":"FASE2_ID04_GESTAO_EQUIPAMENTOS.md"},{"id":"5","ideia":"Gestão da qualidade","posicao":"4 · 4,36","encontrou":"QMS horizontais e módulos de qualidade em LIMS foram encontrados.","lacuna":"Não foi demonstrada lacuna de nicho nem insatisfação com as soluções atuais.","proximoTeste":"Observar um ciclo recente de documento/treinamento/não conformidade até encerramento; identificar gargalo e sistema atual.","status":"PENDENTE — não executada","relatorio":"FASE2_ID05_GESTAO_QUALIDADE.md"},{"id":"6","ideia":"CEP e incerteza de medição","posicao":"14 · 3,50","encontrou":"Ferramentas estatísticas, metrológicas e funções de LIMS se sobrepõem parcialmente.","lacuna":"CEP, MSA e incerteza são entregas distintas; método, usuário e dor prioritária não definidos.","proximoTeste":"Escolher um método e um perfil laboratorial; reconstruir análise recente e separar cálculo, interpretação, registro e aprovação.","status":"PENDENTE — não executada","relatorio":"FASE2_ID06_CEP_INCERTEZA_MEDICAO.md"},{"id":"7","ideia":"Resíduos químicos e produtos controlados","posicao":"13 · 3,71","encontrou":"Foram identificados sistemas EHS/resíduos e substitutos; regras variam por atividade e jurisdição.","lacuna":"Aplicabilidade regulatória concreta depende do gerador, material/resíduo e local; não validada para comprador.","proximoTeste":"Delimitar primeiro uma obrigação e jurisdição; entrevistar responsável e percorrer um registro autorizado sem copiar dados sensíveis.","status":"PENDENTE — não executada","relatorio":"FASE2_ID07_RESIDUOS_QUIMICOS_CONTROLADOS.md"},{"id":"8","ideia":"Captura automática de dados de instrumentos","posicao":"11 · 3,93","encontrou":"Existem fornecedores/integradores e soluções de aquisição de dados.","lacuna":"Compatibilidade de modelos/protocolos, custo de integração e ROI não verificados.","proximoTeste":"Inventariar instrumentos de um laboratório-alvo e observar uma transcrição real; PoC apenas em ambiente autorizado.","status":"PENDENTE — não executada","relatorio":"FASE2_ID08_CAPTURA_DADOS_INSTRUMENTOS.md"},{"id":"9","ideia":"Portal do cliente para laboratórios","posicao":"8 · 4,14","encontrou":"Portal do cliente aparece como módulo em produtos LIMS.","lacuna":"Problema autônomo e vantagem sobre o portal já incluído no sistema não demonstrados.","proximoTeste":"Rastrear uma solicitação de análise até a entrega ao cliente; entrevistar solicitante e equipe sobre fricções reais.","status":"PENDENTE — não executada","relatorio":"FASE2_ID09_PORTAL_CLIENTE_LABS.md"},{"id":"10","ideia":"Gestão de formulações industriais","posicao":"10 · 4,00","encontrou":"Foram localizadas alternativas em ERP e gestão de fórmulas.","lacuna":"Setor, porte, mudanças de fórmula e exigências aplicáveis precisam ser delimitados.","proximoTeste":"Selecionar um setor e reconstruir uma alteração de fórmula; mapear versões, aprovações, insumos e retrabalho.","status":"PENDENTE — não executada","relatorio":"FASE2_ID10_GESTAO_FORMULACOES_INDUSTRIAIS.md"},{"id":"11","ideia":"Assistente para manuais/POPs","posicao":"6 · 4,29","encontrou":"Há produtos de perguntas e respostas sobre documentos e IA.","lacuna":"Acurácia, versionamento, governança e tolerância a erro no contexto do cliente não testados.","proximoTeste":"Usar documentos sintéticos/autorizados e gabarito revisado por especialista; medir respostas incorretas, omissões e revisão humana.","status":"PENDENTE — não executada","relatorio":"FASE2_ID11_ASSISTENTE_POP_IA.md"},{"id":"12","ideia":"Leitura de laudos de fornecedores em PDF","posicao":"1 · 4,79","encontrou":"Extração de PDF/IA e funções correlatas em LIMS estão disponíveis no mercado.","lacuna":"Acurácia em formatos reais, custo de revisão e integração no público-alvo não comprovados.","proximoTeste":"Testar PDFs sintéticos ou autorizados com gabarito conferido; medir erros por campo, exceções e tempo total com revisão.","status":"PENDENTE — não executada","relatorio":"FASE2_ID12_LEITURA_LAUDOS_FORNECEDORES.md"},{"id":"13","ideia":"CSV / validação de sistemas e QA automation","posicao":"12 · 3,86","encontrou":"Há ofertas de consultoria CSV e QA automation; são serviços e compradores distintos.","lacuna":"Credenciais, experiência, nicho, acesso e capacidade dos proponentes não verificados.","proximoTeste":"Separar pistas: CSV — caso regulado e documentação; QA — ciclo de release e PoC autorizado. Definir público e competência para cada uma.","status":"PENDENTE — não executada","relatorio":"FASE2_ID13_VALIDACAO_SISTEMAS_TESTES_AUTOMATIZADOS.md"},{"id":"14","ideia":"Gestão para associações de cannabis","posicao":"15 · 3,29","encontrou":"Plataformas com funções sobrepostas foram encontradas; sandbox regulatório não equivale a autorização geral.","lacuna":"Enquadramento de cada organização, requisitos, segurança e disposição a pagar desconhecidos.","proximoTeste":"Validar contexto com interlocutor autorizado e orientação jurídica/sanitária; mapear um fluxo com dados sintéticos/anonimizados.","status":"PENDENTE — não executada","relatorio":"FASE2_ID14_GESTAO_ASSOCIACOES_CANNABIS.md"},{"id":"15","ideia":"Análise de canabinoides / controle de qualidade","posicao":"16 · 2,71","encontrou":"Há fornecedores/laboratórios anunciando serviços e rotas de parceria ou internalização.","lacuna":"Escopo oficial, capacidade, demanda, investimento e economia unitária não confirmados.","proximoTeste":"Comparar cotações e escopos de fornecedores; entrevistar compradores sobre pedidos recentes antes de considerar laboratório próprio.","status":"PENDENTE — não executada","relatorio":"FASE2_ID15_ANALISE_CANABINOIDES_CONTROLE_QUALIDADE.md"},{"id":"16","ideia":"WhatsApp e agendamento","posicao":"3 · 4,43","encontrou":"Soluções comerciais de agenda/mensagens existem em verticais específicas.","lacuna":"Pet shops, clínicas e tabacarias não são um ICP único; custo, integração e impacto em faltas não medidos.","proximoTeste":"Escolher uma vertical; mapear agendamento e faltas recentes, sistema atual e testar protótipo sem mensagem real sem consentimento.","status":"PENDENTE — não executada","relatorio":"FASE2_ID16_WHATSAPP_AGENDAMENTO.md"}],"analiseRanking":[{"rank":"1","id":"12","area":"IA","ideia":"Leitura automática de laudos de fornecedores em PDF, com conferência e alertas","dor":"5","gasto":"5","mercado":"5","concorrencia":"3","regulacao":"4","mvp":"5","recorrencia":"5","nota":"4.79","prioridade":"Validar primeiro","obs":"Hipótese: combina dor, economia mensurável e MVP rápido; precisa validar acurácia e formatos."},{"rank":"2","id":"2","area":"Lab / Química","ideia":"Rastreio de amostras: recebimento → análise → laudo, com histórico completo","dor":"5","gasto":"5","mercado":"4","concorrencia":"3","regulacao":"3","mvp":"4","recorrencia":"5","nota":"4.43","prioridade":"Validar primeiro","obs":"Hipótese: processo crítico e recorrente; boa base para SaaS. Validar integrações e concorrência."},{"rank":"3","id":"16","area":"Pequenos negócios","ideia":"Sistema com WhatsApp e agendamento (pet shops, tabacarias, clínicas)","dor":"5","gasto":"4","mercado":"5","concorrencia":"1","regulacao":"4","mvp":"5","recorrencia":"5","nota":"4.43","prioridade":"Validar primeiro","obs":"Hipótese: MVP e mercado acessíveis, porém concorrência muito alta; precisa nichar para vencer."},{"rank":"4","id":"5","area":"Lab / Química","ideia":"Gestão da qualidade: POPs, treinamentos, não conformidades e auditorias","dor":"5","gasto":"5","mercado":"4","concorrencia":"2","regulacao":"3","mvp":"4","recorrencia":"5","nota":"4.36","prioridade":"Validar depois","obs":"Hipótese: dor alta e orçamento potencial; mercado mais concorrido e requisitos de qualidade importantes."},{"rank":"5","id":"3","area":"Lab / Química","ideia":"Emissão automática de laudos e certificados de análise a partir dos resultados","dor":"4","gasto":"5","mercado":"4","concorrencia":"2","regulacao":"3","mvp":"5","recorrencia":"5","nota":"4.29","prioridade":"Validar depois","obs":"Hipótese: economia de tempo evidente; diferenciação precisa ser investigada."},{"rank":"6","id":"11","area":"IA","ideia":"Assistente que responde perguntas sobre o manual de qualidade e os POPs da empresa","dor":"4","gasto":"4","mercado":"5","concorrencia":"2","regulacao":"4","mvp":"5","recorrencia":"5","nota":"4.29","prioridade":"Validar depois","obs":"Hipótese: MVP muito rápido; risco principal é precisão, atualização documental e confiança."},{"rank":"7","id":"4","area":"Lab / Química","ideia":"Gestão de equipamentos: calibração, manutenção e verificação, com agenda e alertas","dor":"4","gasto":"4","mercado":"4","concorrencia":"3","regulacao":"3","mvp":"5","recorrencia":"5","nota":"4.14","prioridade":"Validar depois","obs":"Hipótese: dor recorrente e MVP viável; validar quantidade de equipamentos e soluções atuais."},{"rank":"8","id":"9","area":"Lab / Química","ideia":"Portal do cliente para labs prestadores: solicitar análise, acompanhar, baixar laudo","dor":"4","gasto":"4","mercado":"5","concorrencia":"2","regulacao":"4","mvp":"5","recorrencia":"4","nota":"4.14","prioridade":"Baixa prioridade","obs":"Hipótese: acesso ao mercado é bom, mas portal genérico tem concorrência."},{"rank":"9","id":"1","area":"Lab / Química","ideia":"Controle de reagentes e estoque (validades, alertas, FISPQ, etiquetas com QR code)","dor":"4","gasto":"4","mercado":"4","concorrencia":"3","regulacao":"3","mvp":"5","recorrencia":"4","nota":"4","prioridade":"Baixa prioridade","obs":"Hipótese: dor operacional forte; MVP relativamente simples. Validar frequência e disposição a pagar."},{"rank":"10","id":"10","area":"Lab / Química","ideia":"Gestão de formulações para pequenas indústrias (versões de receita, custo, ficha técnica)","dor":"4","gasto":"4","mercado":"4","concorrencia":"3","regulacao":"3","mvp":"4","recorrencia":"5","nota":"4","prioridade":"Baixa prioridade","obs":"Hipótese: recorrência e valor econômico; validar segmentos e complexidade regulatória."},{"rank":"11","id":"8","area":"Lab / Química","ideia":"Captura automática de dados de instrumentos (balança, pHmetro etc.), sem redigitar","dor":"5","gasto":"5","mercado":"3","concorrencia":"3","regulacao":"2","mvp":"2","recorrencia":"5","nota":"3.93","prioridade":"Baixa prioridade","obs":"Hipótese: ROI potencial alto; hardware/protocolos e integrações podem tornar o MVP difícil."},{"rank":"12","id":"13","area":"QA (experiência do Will)","ideia":"Validação de sistemas computadorizados e testes automatizados como serviço","dor":"5","gasto":"5","mercado":"3","concorrencia":"4","regulacao":"2","mvp":"3","recorrencia":"3","nota":"3.86","prioridade":"Baixa prioridade","obs":"Hipótese: barreira de conhecimento cria diferenciação; modelo inicial é mais serviço que SaaS."},{"rank":"13","id":"7","area":"Lab / Química","ideia":"Resíduos químicos e produtos controlados: conformidade e documentação obrigatória","dor":"4","gasto":"5","mercado":"3","concorrencia":"3","regulacao":"2","mvp":"3","recorrencia":"4","nota":"3.71","prioridade":"Baixa prioridade","obs":"Hipótese: problema real, porém risco/regulação aumentam custo de entrada."},{"rank":"14","id":"6","area":"Lab / Química","ideia":"Controle estatístico e incerteza de medição (labs acreditados)","dor":"4","gasto":"4","mercado":"3","concorrencia":"3","regulacao":"2","mvp":"2","recorrencia":"5","nota":"3.5","prioridade":"Baixa prioridade","obs":"Hipótese: nicho técnico e recorrente, mas MVP e suporte exigem conhecimento especializado."},{"rank":"15","id":"14","area":"Cannabis","ideia":"Gestão para associações: pacientes, produção, rastreabilidade e prestação de contas","dor":"4","gasto":"4","mercado":"2","concorrencia":"3","regulacao":"1","mvp":"2","recorrencia":"5","nota":"3.29","prioridade":"Baixa prioridade","obs":"Hipótese: dor potencial alta, mas mercado/endereço regulatório exigem validação específica."},{"rank":"16","id":"15","area":"Cannabis","ideia":"Análise de canabinoides e controle de qualidade como serviço","dor":"4","gasto":"4","mercado":"2","concorrencia":"3","regulacao":"1","mvp":"1","recorrencia":"2","nota":"2.71","prioridade":"Baixa prioridade","obs":"Hipótese: valor técnico alto, porém dependência de laboratório, capital e regulação."}],"leituraExecutiva":["1) Melhor candidato para teste rápido: leitura automática de laudos PDF — dor e economia são mensuráveis e o MVP pode começar como serviço assistido por IA.","2) Melhor oportunidade de software vertical: rastreio de amostras — processo crítico, recorrente e com potencial de retenção.","3) Oportunidade comercial ampla, porém concorrida: WhatsApp + agendamento — só faz sentido com um nicho e uma dor específica.","4) Serviço com barreira de conhecimento: validação de sistemas computadorizados — pode gerar caixa antes de virar produto, mas depende de posicionamento e capacidade técnica.","5) Cannabis: não foi descartada, mas deve ficar atrás na validação inicial porque as atividades dependem de enquadramento e exigências regulatórias específicas."],"comoUsar":["Pesquisa de ideias — Will & Lucas","OBJETIVO: escolher, com critérios combinados antes, 1 ou 2 ideias para validar com clientes reais.","ABAS","• Ideias: 16 ideias iniciais + 2 linhas livres. Dê nota de 1 a 5 em cada critério; a nota final e o ranking são calculados sozinhos.","• Critérios: o que significa nota 1 e nota 5 em cada critério (para vocês dois darem notas com o mesmo entendimento).","• Roteiro Lucas: perguntas para a conversa de 30 a 45 min, com coluna de anotações.","• Dores do Lucas: registro das dores que aparecerem na conversa. Cada dor pode virar uma ideia nova na aba Ideias.","COMO PREENCHER","• Células amarelas com texto azul são para preencher (notas, pesos, anotações). Todo o resto é fórmula ou texto fixo.","• Escala: 1 a 5, onde 5 é sempre o MELHOR para vocês. Ex.: 'Pouca concorrência' com nota 5 = quase ninguém oferece isso.","• A nota final só aparece quando os 7 critérios da linha estão preenchidos.","• As linhas em cinza itálico são exemplos e não entram no ranking. Podem ser apagadas.","PESOS","• Os pesos da aba Ideias (linha 3) são uma sugestão inicial minha (dor e disposição a pagar pesam mais). Ajustem entre vocês; a nota se recalcula.","SUGESTÃO DE REGRA DE DECISÃO (combinem antes de pontuar)","• Seguir para validação apenas com ideias que tenham nota final alta E 'Dor real e frequente' com nota 4 ou 5. Nota alta com dor baixa costuma ser ideia bonita que ninguém compra.","• A pontuação só vale depois da conversa com o Lucas e da pesquisa de mesa. Notas antes disso são palpites; anotem a fonte da nota na coluna Observações."],"notas":{"analiseA1":"ANÁLISE DE OPORTUNIDADES — triagem preliminar","analiseA2":"Importante: as notas abaixo são hipóteses analíticas, não respostas de clientes. Devem ser substituídas/ajustadas após entrevistas e evidências.","ideiasA1":"Pontuação das ideias","ideiasA2":"Notas de 1 a 5 (5 = melhor para vocês). Amarelo = preencher. A nota final aparece quando os 7 critérios estão preenchidos.","matrizA1":"MATRIZ DE VALIDAÇÃO — transforme hipóteses em evidências","matrizA2":"Regra: só aumente a nota quando houver evidência observável (entrevista, processo real, orçamento, pagamento, piloto ou dado público).","doresA1":"Registro de dores (preencher durante/depois da conversa)","doresA2":"Uma linha por dor. Depois, transfira as mais fortes para a aba Ideias (linhas 'Nova ideia') e pontue.","pesquisaA2":"Pesquisa de mesa da Fase 2 e síntese da Fase 3, relacionada à triagem preliminar da aba Análise. Evidência documental NÃO comprova dor de cliente, compra ou disposição a pagar. Nenhuma validação humana foi realizada."}};
+
+    // ==================== ESTADO / PERSISTÊNCIA ====================
+    const STORAGE_KEY = 'omena_pesquisa_completa_v1';
+    const CHAVES_NOTAS = ['dor','gasto','mercado','concorrencia','regulacao','mvp','recorrencia'];
+    const ROTULOS_CURTOS = {
+      dor:'Dor real e frequente', gasto:'Já gastam tempo/dinheiro', mercado:'Mercado acessível',
+      concorrencia:'Pouca concorrência', regulacao:'Pouca regulação/risco',
+      mvp:'MVP rápido', recorrencia:'Receita recorrente'
+    };
+    let saveTimeout = null;
+    let abaAtual = 'visao';
+    let state = null;
+
+    function notasVazias(){
+      const o = {}; CHAVES_NOTAS.forEach(k => o[k] = ''); return o;
+    }
+
+    function estadoInicial(){
+      const porNum = (lista, campo) => {
+        const m = {};
+        lista.forEach(it => m[String(it.id)] = it);
+        return m;
+      };
+      const mMatriz = porNum(DADOS.matriz);
+      const mPesquisa = porNum(DADOS.pesquisa);
+      return {
+        _v: 1,
+        pesos: Object.assign({}, DADOS.pesos),
+        identificacao: {nome:'', data:'', entrevistador:'', tempoPrevisto:'30 a 45 min', tempoReal:''},
+        ideias: DADOS.ideias.map((it, i) => {
+          const num = i + 1;
+          const mp = mMatriz[String(num)] || {};
+          const pp = mPesquisa[String(num)] || {};
+          return {
+            num, area: it.area || '', nome: it.nome || '',
+            notas: notasVazias(), obs: '',
+            matriz: {
+              evidencia:'', resolvem:'', tempo:'', quemUsa:'', quemPaga:'', concorrentes:'', preco:'',
+              proximoTeste: mp.proximoTeste || 'Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.'
+            },
+            pesquisa: {
+              posicao: pp.posicao || '', encontrou: pp.encontrou || '', lacuna: pp.lacuna || '',
+              proximoTeste: pp.proximoTeste || '',
+              status: pp.status || 'PENDENTE — não executada',
+              relatorio: pp.relatorio || ''
+            }
+          };
+        }),
+        roteiro: DADOS.roteiro.map(q => ({bloco:q.bloco, tempo:q.tempo, pergunta:q.pergunta, descobrir:q.descobrir, anota:'', custom:false})),
+        dores: [novaDor(), novaDor(), novaDor()],
+        plano: DADOS.plano.map(p => ({
+          etapa:p.etapa, objetivo:p.objetivo, atividade:p.atividade, saida:p.saida,
+          criterio:p.criterio, prazo:p.prazo, status:'Não iniciado', obs:''
+        })),
+        fontes: DADOS.fontes.map(f => ({tema:f.tema, fonte:f.fonte, sustenta:f.sustenta, url:f.url})),
+        bia: {}
+      };
+    }
+
+    function novaDor(){
+      return {situacao:'', frequencia:'', tempo:'', resolvem:'', quemSofre:'', quemPaga:'', ideia:'', forca:''};
+    }
+
+    function salvarTudo(){
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+      atualizarStatus();
+    }
+
+    function agendarSalvar(){
+      clearTimeout(saveTimeout);
+      mostrarProgresso();
+      saveTimeout = setTimeout(() => { salvarTudo(); esconderProgresso(); }, 700);
+    }
+
+    function carregarDados(){
+      try {
+        const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        if (salvo && salvo._v === 1) {
+          state = salvo;
+          return;
+        }
+      } catch(e) { console.warn('Erro ao carregar:', e); }
+      state = estadoInicial();
+    }
+
+    // ==================== UTILITÁRIOS ====================
+    function esc(s){
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function fmt(n){ return n.toFixed(2).replace('.', ','); }
+    function setPath(path, val){
+      const parts = path.split('.');
+      let o = state;
+      for (let i = 0; i < parts.length - 1; i++) o = o[parts[i]];
+      o[parts[parts.length - 1]] = val;
+    }
+    function notaFinal(ideia){
+      const somaPesos = CHAVES_NOTAS.reduce((s, k) => s + (parseFloat(state.pesos[k]) || 0), 0);
+      if (somaPesos <= 0) return null;
+      let acc = 0;
+      for (const k of CHAVES_NOTAS){
+        const v = parseFloat(ideia.notas[k]);
+        if (isNaN(v)) return null;
+        acc += v * (parseFloat(state.pesos[k]) || 0);
+      }
+      return acc / somaPesos;
+    }
+    function ranks(){
+      const notas = state.ideias.map(notaFinal);
+      return notas.map(n => {
+        if (n == null) return null;
+        return 1 + notas.filter(x => x != null && x > n).length;
+      });
+    }
+    function ehCandidata(ideia){
+      const n = notaFinal(ideia);
+      return n != null && n >= 4 && parseFloat(ideia.notas.dor) >= 4;
+    }
+    function atualizarCalculos(){
+      const rs = ranks();
+      document.querySelectorAll('[data-nf]').forEach(el => {
+        const n = notaFinal(state.ideias[+el.dataset.nf]);
+        el.textContent = n == null ? '—' : fmt(n);
+      });
+      document.querySelectorAll('[data-rank]').forEach(el => {
+        const r = rs[+el.dataset.rank];
+        el.textContent = r == null ? '—' : '#' + r;
+      });
+      document.querySelectorAll('[data-vb]').forEach(el => {
+        const ok = ehCandidata(state.ideias[+el.dataset.vb]);
+        el.className = ok ? 'badge-ok' : 'badge-off';
+        el.textContent = ok ? '★ Candidata a validar' : 'Aguardando 7 notas (dor ≥ 4 e nota ≥ 4)';
+      });
+      const soma = document.getElementById('somaPesos');
+      if (soma) soma.textContent = CHAVES_NOTAS.reduce((s, k) => s + (parseFloat(state.pesos[k]) || 0), 0);
+    }
+
+    function sel15(path, val, prefixo){
+      let h = '<select data-path="' + esc(path) + '" data-recalc="1">';
+      h += '<option value="">—</option>';
+      for (let i = 1; i <= 5; i++){
+        h += '<option value="' + i + '"' + (String(val) === String(i) ? ' selected' : '') + '>' + i + (prefixo ? ' — ' + esc(prefixo[i]) : '') + '</option>';
+      }
+      return h + '</select>';
+    }
+
+    function campo(path, val, tipo, ph){
+      const t = tipo || 'text';
+      if (t === 'textarea'){
+        return '<textarea data-path="' + esc(path) + '" placeholder="' + esc(ph || '') + '">' + esc(val) + '</textarea>';
+      }
+      return '<input type="' + esc(t) + '" data-path="' + esc(path) + '" value="' + esc(val) + '" placeholder="' + esc(ph || '') + '">';
+    }
+
+    // ==================== RENDERIZAÇÃO ====================
+    const ABAS = [
+      {id:'visao', rot:'Visão geral'},
+      {id:'ideias', rot:'Ideias'},
+      {id:'criterios', rot:'Critérios'},
+      {id:'roteiro', rot:'Roteiro Lucas'},
+      {id:'dores', rot:'Dores do Lucas'},
+      {id:'matriz', rot:'Matriz de validação'},
+      {id:'plano', rot:'Plano de ação'},
+      {id:'pesquisa', rot:'Pesquisa documental'},
+      {id:'fontes', rot:'Fontes'},
+      {id:'bia', rot:'Bia (25)'},
+      {id:'ajuda', rot:'Como usar'}
+    ];
+
+    function renderNav(){
+      document.getElementById('nav').innerHTML = ABAS.map(a =>
+        '<button class="aba' + (a.id === abaAtual ? ' ativa' : '') + '" data-view="' + a.id + '" type="button">' + esc(a.rot) + '</button>'
+      ).join('');
+    }
+
+    function setView(id){
+      abaAtual = id;
+      renderNav();
+      document.getElementById('main').innerHTML = renderers[id]();
+      if (id === 'ideias') atualizarCalculos();
+      window.scrollTo({top: 0, behavior: 'auto'});
+      salvarTudo();
+    }
+
+    // ---------- Visão geral ----------
+    function renderVisao(){
+      const rs = ranks();
+      const pontuadas = state.ideias.filter(i => notaFinal(i) != null).length;
+      const candidatas = state.ideias.filter(ehCandidata).length;
+      const doresCount = state.dores.filter(d => d.situacao.trim()).length;
+      const fortes = state.dores.filter(d => parseFloat(d.forca) >= 4).length;
+      const etapasOk = state.plano.filter(p => p.status === 'Concluído').length;
+      const pesqOk = state.ideias.filter(i => (i.pesquisa.status || '').toLowerCase().includes('conclu')).length;
+
+      let h = '<section class="form-section"><h2>Visão geral</h2>';
+      h += '<div class="kpis">';
+      h += kpi(pontuadas + '/' + state.ideias.length, 'Ideias pontuadas');
+      h += kpi(candidatas, '★ Candidatas a validar');
+      h += kpi(doresCount, 'Dores registradas');
+      h += kpi(fortes, 'Dores fortes (≥4)');
+      h += kpi(etapasOk + '/' + state.plano.length, 'Etapas concluídas');
+      h += kpi(pesqOk + '/' + state.ideias.length, 'Pesquisas concluídas');
+      h += '</div>';
+      h += '<div class="note"><b>Regra de decisão (combinem antes de pontuar):</b> seguir para validação apenas com ideias que tenham nota final alta <b>E</b> “Dor real e frequente” com nota 4 ou 5. Nota alta com dor baixa costuma ser ideia bonita sem urgência. A pontuação só vale depois da conversa com o Lucas e da pesquisa de mesa.</div>';
+
+      // Ranking automático
+      h += '<h3>Ranking automático (suas notas na aba Ideias)</h3>';
+      const ordenadas = state.ideias.map((it, i) => ({it, i, n: notaFinal(it), r: rs[i]}))
+        .filter(x => x.n != null).sort((a, b) => b.n - a.n);
+      if (!ordenadas.length){
+        h += '<div class="note warn">Nenhuma ideia com as 7 notas preenchidas ainda. Vá na aba <b>Ideias</b> e pontue — o ranking aparece aqui sozinho.</div>';
+      } else {
+        h += ordenadas.map(x =>
+          '<div class="card"><div class="card-top">' +
+          '<span class="chip azul">#' + x.r + '</span>' +
+          '<span class="chip cinza">' + esc(x.it.area || 'sem área') + '</span>' +
+          (ehCandidata(x.it) ? '<span class="badge-ok">★ Candidata a validar</span>' : '<span class="badge-off">Aguardando critérios</span>') +
+          '</div><b>' + esc(x.it.nome || '(ideia sem nome)') + '</b>' +
+          '<div class="nota-final"><span>Nota final</span><span class="valor">' + fmt(x.n) + '</span>' +
+          '<span style="color:var(--muted);font-size:.82rem">dor ' + esc(x.it.notas.dor || '—') + ' · ' + esc(x.it.obs ? x.it.obs.slice(0, 90) : '') + '</span></div></div>'
+        ).join('');
+      }
+
+      // Leitura executiva
+      h += '<h3>Leitura executiva (da planilha)</h3><ol>' +
+        DADOS.leituraExecutiva.map(t => '<li style="margin:8px 0">' + esc(t.replace(/^\d\)\s*/, '')) + '</li>').join('') +
+        '</ol></section>';
+
+      // Triagem preliminar
+      h += '<section class="form-section"><h2>Triagem preliminar — aba Análise da planilha</h2>';
+      h += '<div class="note warn">' + esc(DADOS.notas.analiseA2) + '</div>';
+      h += '<div class="tw"><table><thead><tr>' +
+        '<th>#</th><th>ID</th><th>Área</th><th>Ideia</th><th class="num">Dor</th><th class="num">Gasto</th><th class="num">Mercado</th><th class="num">Conc.</th><th class="num">Reg.</th><th class="num">MVP</th><th class="num">Rec.</th><th class="num">Nota</th><th>Prioridade</th><th>Observação</th>' +
+        '</tr></thead><tbody>' +
+        DADOS.analiseRanking.map(a =>
+          '<tr><td class="num">' + esc(a.rank) + '</td><td class="num">' + esc(a.id) + '</td><td>' + esc(a.area) + '</td><td>' + esc(a.ideia) + '</td>' +
+          '<td class="num">' + esc(a.dor) + '</td><td class="num">' + esc(a.gasto) + '</td><td class="num">' + esc(a.mercado) + '</td><td class="num">' + esc(a.concorrencia) + '</td><td class="num">' + esc(a.regulacao) + '</td><td class="num">' + esc(a.mvp) + '</td><td class="num">' + esc(a.recorrencia) + '</td>' +
+          '<td class="num"><b>' + esc(a.nota.replace('.', ',')) + '</b></td><td>' + esc(a.prioridade) + '</td><td>' + esc(a.obs) + '</td></tr>'
+        ).join('') +
+        '</tbody></table></div></section>';
+      return h;
+    }
+    function kpi(n, l){
+      return '<div class="kpi"><div class="n">' + esc(n) + '</div><div class="l">' + esc(l) + '</div></div>';
+    }
+
+    // ---------- Ideias ----------
+    function renderIdeias(){
+      let h = '<section class="form-section"><h2>Pontuação das ideias</h2>';
+      h += '<div class="note">' + esc(DADOS.notas.ideiasA2) + '</div>';
+
+      h += '<h3>Pesos dos critérios <small>soma = <b id="somaPesos">0</b> · ajuste e a nota final recalcula sozinha</small></h3>';
+      h += '<div class="pesos-grid">' + CHAVES_NOTAS.map(k =>
+        '<div class="campo-curto"><label>' + esc(ROTULOS_CURTOS[k]) + '</label>' +
+        '<input type="number" min="0" max="10" step="0.5" data-path="pesos.' + k + '" data-recalc="1" value="' + esc(state.pesos[k]) + '"></div>'
+      ).join('') + '</div>';
+
+      h += '<details><summary>Linha de exemplo da planilha (não conta no ranking)</summary><div class="detalhe-corpo">' +
+        '<div class="pergunta"><div class="p">' + esc(DADOS.exemplo.nome) + '</div>' +
+        '<div class="d">' + CHAVES_NOTAS.map(k => esc(ROTULOS_CURTOS[k]) + ': ' + esc(DADOS.exemplo.notas[k])).join(' · ') + '</div>' +
+        '<small>' + esc(DADOS.exemplo.obs) + '</small></div></div></details>';
+
+      h += state.ideias.map((it, i) => cardIdeia(it, i)).join('');
+      h += '<button class="btn btn-primary full" data-add="ideia" type="button">＋ Adicionar nova ideia</button>';
+      h += '<small>Notas de 1 a 5 (5 = melhor para vocês). A nota final só aparece quando os 7 critérios estão preenchidos. Ranking automático em “Visão geral”.</small>';
+      h += '</section>';
+      return h;
+    }
+    function cardIdeia(it, i){
+      let h = '<div class="card"><div class="card-top">';
+      h += '<span class="chip azul">#' + (i + 1) + '</span>';
+      h += '<div style="flex:1 1 140px;min-width:0">' + campo('ideias.' + i + '.area', it.area, 'text', 'Área (ex.: Lab / Química)') + '</div>';
+      h += '<button class="btn btn-danger btn-mini" data-rm="ideia:' + i + '" type="button">Remover</button>';
+      h += '</div>';
+      h += '<div class="linha"><label>Ideia</label>' + campo('ideias.' + i + '.nome', it.nome, 'textarea', 'Descreva a ideia...') + '</div>';
+      h += '<div class="notas-grid">' + CHAVES_NOTAS.map(k =>
+        '<div class="campo-curto"><label>' + esc(ROTULOS_CURTOS[k]) + '</label>' +
+        sel15('ideias.' + i + '.notas.' + k, it.notas[k]) + '</div>'
+      ).join('') + '</div>';
+      h += '<div class="nota-final"><span>Nota final (1–5):</span><span class="valor" data-nf="' + i + '">—</span>' +
+        '<span>Ranking: <b data-rank="' + i + '">—</b></span>' +
+        '<span data-vb="' + i + '" class="badge-off">Aguardando 7 notas (dor ≥ 4 e nota ≥ 4)</span></div>';
+      h += '<div class="linha"><label>Observações / fonte da nota</label>' + campo('ideias.' + i + '.obs', it.obs, 'textarea', 'De onde veio cada nota? O que foi observado?') + '</div>';
+      h += '</div>';
+      return h;
+    }
+
+    // ---------- Critérios ----------
+    function renderCriterios(){
+      let h = '<section class="form-section"><h2>O que significa cada nota</h2>';
+      h += '<div class="note">Escala: 1 a 5, onde <b>5 é sempre o MELHOR para vocês</b>. Ex.: “Pouca concorrência” com nota 5 = quase ninguém oferece isso.</div>';
+      h += DADOS.criterios.map((c, i) =>
+        '<details' + (i === 0 ? ' open' : '') + '><summary>' + esc(c.nome) + '</summary><div class="detalhe-corpo">' +
+        '<div class="pergunta"><div class="p">Pergunta-chave</div><div class="d">' + esc(c.pergunta) + '</div>' +
+        '<div class="card-top"><span class="chip vermelho">Nota 1</span><span>' + esc(c.nota1) + '</span></div>' +
+        '<div class="card-top"><span class="chip verde">Nota 5</span><span>' + esc(c.nota5) + '</span></div>' +
+        '</div></div></details>'
+      ).join('');
+      h += '</section>';
+      return h;
+    }
+
+    // ---------- Roteiro Lucas ----------
+    function renderRoteiro(){
+      let h = '<section class="form-section"><h2>Roteiro da conversa com o Lucas</h2>';
+      h += '<div class="note">Regras: perguntar sobre o <b>PASSADO</b> (o que aconteceu) e não sobre o futuro (o que faria). Duração: 30 a 45 min. Anote tudo na coluna “Anotações”.</div>';
+
+      h += '<div class="grid-2">';
+      h += '<div class="linha"><label>Nome</label>' + campo('identificacao.nome', state.identificacao.nome) + '</div>';
+      h += '<div class="linha"><label>Data da conversa</label><input type="date" data-path="identificacao.data" value="' + esc(state.identificacao.data) + '"></div>';
+      h += '<div class="linha"><label>Entrevistador</label>' + campo('identificacao.entrevistador', state.identificacao.entrevistador) + '</div>';
+      h += '<div class="linha"><label>Tempo previsto</label><select data-path="identificacao.tempoPrevisto">' +
+        ['30 a 45 min','15 a 20 min','mais de 45 min'].map(o =>
+          '<option' + (state.identificacao.tempoPrevisto === o ? ' selected' : '') + '>' + o + '</option>').join('') +
+        '</select></div>';
+      h += '<div class="linha"><label>Tempo real</label>' + campo('identificacao.tempoReal', state.identificacao.tempoReal, 'text', 'ex.: 38 min') + '</div>';
+      h += '</div>';
+
+      // agrupa por bloco
+      const blocos = [];
+      state.roteiro.forEach((q, i) => {
+        let b = blocos.find(x => x.nome === q.bloco);
+        if (!b){ b = {nome: q.bloco, itens: []}; blocos.push(b); }
+        b.itens.push({q, i});
+      });
+      h += blocos.map(b => {
+        const tempos = b.itens.map(x => x.q.tempo).filter(Boolean);
+        return '<details' + (b === blocos[0] ? ' open' : '') + '><summary>' + esc(b.nome) +
+          (tempos.length ? ' <span class="chip cinza" style="font-weight:600">' + esc(tempos[0]) + '</span>' : '') +
+          '</summary><div class="detalhe-corpo">' +
+          b.itens.map(x =>
+            '<div class="pergunta"><div class="p">' + esc(x.q.pergunta) + '</div>' +
+            (x.q.descobrir ? '<div class="d">O que estamos tentando descobrir: ' + esc(x.q.descobrir) + '</div>' : '') +
+            '<div class="rot" style="margin-bottom:6px">Anotações</div>' +
+            '<textarea data-path="roteiro.' + x.i + '.anota" placeholder="Anote a resposta dele aqui...">' + esc(x.q.anota) + '</textarea>' +
+            (x.q.custom ? '<button class="btn btn-danger btn-mini" data-rm="pergunta:' + x.i + '" type="button" style="margin-top:8px">Remover pergunta</button>' : '') +
+            '</div>'
+          ).join('') +
+          '</div></details>';
+      }).join('');
+
+      // adicionar pergunta
+      h += '<details><summary>＋ Adicionar pergunta própria</summary><div class="detalhe-corpo">' +
+        '<div class="linha"><label>Pergunta</label><textarea id="novaPergunta" placeholder="Escreva a pergunta..."></textarea></div>' +
+        '<div class="grid-2">' +
+        '<div class="linha"><label>Bloco</label><select id="novoBloco">' + blocos.map(b => '<option>' + esc(b.nome) + '</option>').join('') + '<option value="__novo">Novo bloco…</option></select></div>' +
+        '<div class="linha"><label>Tempo</label><input type="text" id="novoTempo" placeholder="ex.: 5 min"></div>' +
+        '</div>' +
+        '<button class="btn btn-primary full" data-add="pergunta" type="button">Adicionar ao roteiro</button>' +
+        '</div></details>';
+      h += '</section>';
+      return h;
+    }
+
+    // ---------- Dores do Lucas ----------
+    function renderDores(){
+      const ex = DADOS.doresExemplo;
+      let h = '<section class="form-section"><h2>Dores do Lucas — registro</h2>';
+      h += '<div class="note">' + esc(DADOS.notas.doresA2) + '</div>';
+      h += '<details><summary>Exemplo da planilha</summary><div class="detalhe-corpo"><div class="pergunta">' +
+        '<div class="p">' + esc(ex.situacao) + '</div>' +
+        '<div class="d">' + esc(ex.frequencia) + ' · ' + esc(ex.tempo) + ' · resolve com: ' + esc(ex.resolvem) + ' · sofre: ' + esc(ex.quemSofre) + ' · paga/decide: ' + esc(ex.quemPaga) + ' · ideia ' + esc(ex.ideia) + ' · força ' + esc(ex.forca) + '</div>' +
+        '</div></div></details>';
+      h += state.dores.map((d, i) => cardDor(d, i)).join('');
+      h += '<button class="btn btn-primary full" data-add="dor" type="button">＋ Adicionar nova dor</button>';
+      h += '</section>';
+      return h;
+    }
+    function cardDor(d, i){
+      const opsIdeias = ['<option value="">—</option>'].concat(state.ideias.map((it, j) =>
+        '<option value="' + (j + 1) + '"' + (String(d.ideia) === String(j + 1) ? ' selected' : '') + '>#' + (j + 1) + ' ' + esc((it.nome || '(sem nome)').slice(0, 50)) + '</option>'
+      )).join('');
+      let h = '<div class="card"><div class="card-top"><span class="chip azul">Dor ' + (i + 1) + '</span>' +
+        '<button class="btn btn-danger btn-mini" data-rm="dor:' + i + '" type="button">Remover</button></div>';
+      h += '<div class="linha"><label>1. Dor / situação (nas palavras dele)</label>' + campo('dores.' + i + '.situacao', d.situacao, 'textarea', 'ex.: toda semana perco uma tarde procurando o certificado do lote...') + '</div>';
+      h += '<div class="grid-2">';
+      h += '<div class="linha"><label>2. Com que frequência</label>' + campo('dores.' + i + '.frequencia', d.frequencia, 'text', 'ex.: Semanal') + '</div>';
+      h += '<div class="linha"><label>3. Tempo ou dinheiro perdido</label>' + campo('dores.' + i + '.tempo', d.tempo, 'text', 'ex.: ~4 h/semana') + '</div>';
+      h += '<div class="linha"><label>5. Quem sofre com isso</label>' + campo('dores.' + i + '.quemSofre', d.quemSofre) + '</div>';
+      h += '<div class="linha"><label>6. Quem paga / decide</label>' + campo('dores.' + i + '.quemPaga', d.quemPaga) + '</div>';
+      h += '<div class="linha"><label>7. Ideia relacionada (nº na aba Ideias)</label><select data-path="dores.' + i + '.ideia">' + opsIdeias + '</select></div>';
+      h += '<div class="linha"><label>8. Força da dor (1–5)</label><select data-path="dores.' + i + '.forca">' +
+        '<option value="">Selecione...</option>' +
+        ['1 — incômodo leve','2 — incômodo moderado','3 — dor relevante','4 — dor forte','5 — dor crítica / urgente'].map((o, k) =>
+          '<option value="' + (k + 1) + '"' + (String(d.forca) === String(k + 1) ? ' selected' : '') + '>' + o + '</option>').join('') +
+        '</select></div>';
+      h += '</div>';
+      h += '<div class="linha"><label>4. Como resolvem hoje</label>' + campo('dores.' + i + '.resolvem', d.resolvem, 'textarea') + '</div>';
+      h += '</div>';
+      return h;
+    }
+
+    // ---------- Matriz de validação ----------
+    function renderMatriz(){
+      let h = '<section class="form-section"><h2>Matriz de validação — transforme hipóteses em evidências</h2>';
+      h += '<div class="note warn">' + esc(DADOS.notas.matrizA2) + '</div>';
+      h += '<small>Uma ficha por ideia (sincronizada com a aba Ideias — ideias novas aparecem aqui automaticamente).</small>';
+      h += state.ideias.map((it, i) => {
+        const m = it.matriz;
+        return '<details><summary><span>#' + (i + 1) + ' ' + esc((it.nome || '(ideia sem nome)').slice(0, 60)) + '</span></summary><div class="detalhe-corpo">' +
+          '<div class="linha"><label>Evidência de dor</label>' + campo('ideias.' + i + '.matriz.evidencia', m.evidencia, 'textarea', 'O que foi observado/ouvido de concreto?') + '</div>' +
+          '<div class="linha"><label>Como resolvem hoje</label>' + campo('ideias.' + i + '.matriz.resolvem', m.resolvem, 'textarea') + '</div>' +
+          '<div class="linha"><label>Tempo/dinheiro perdido</label>' + campo('ideias.' + i + '.matriz.tempo', m.tempo, 'textarea') + '</div>' +
+          '<div class="grid-2">' +
+          '<div class="linha"><label>Quem usa</label>' + campo('ideias.' + i + '.matriz.quemUsa', m.quemUsa) + '</div>' +
+          '<div class="linha"><label>Quem paga/decide</label>' + campo('ideias.' + i + '.matriz.quemPaga', m.quemPaga) + '</div>' +
+          '<div class="linha"><label>Concorrentes encontrados</label>' + campo('ideias.' + i + '.matriz.concorrentes', m.concorrentes) + '</div>' +
+          '<div class="linha"><label>Preço aceitável</label>' + campo('ideias.' + i + '.matriz.preco', m.preco) + '</div>' +
+          '</div>' +
+          '<div class="linha"><label>Próximo teste</label>' + campo('ideias.' + i + '.matriz.proximoTeste', m.proximoTeste, 'textarea') + '</div>' +
+          '</div></details>';
+      }).join('');
+      h += '</section>';
+      return h;
+    }
+
+    // ---------- Plano de ação ----------
+    function renderPlano(){
+      let h = '<section class="form-section"><h2>Plano de ação — 14 dias para chegar a evidência</h2>';
+      h += state.plano.map((p, i) =>
+        '<div class="card"><div class="card-top">' +
+        '<span class="chip azul">' + esc(p.etapa) + '</span>' +
+        '<span class="chip cinza">' + esc(p.prazo) + '</span>' +
+        '<div style="flex:1 1 160px"><select data-path="plano.' + i + '.status">' +
+        ['Não iniciado','Em andamento','Concluído'].map(o =>
+          '<option' + (p.status === o ? ' selected' : '') + '>' + o + '</option>').join('') +
+        '</select></div>' +
+        (i >= DADOS.plano.length ? '<button class="btn btn-danger btn-mini" data-rm="plano:' + i + '" type="button">Remover</button>' : '') +
+        '</div>' +
+        '<div class="pergunta"><div class="p">' + esc(p.atividade) + '</div>' +
+        '<div class="d">Objetivo: ' + esc(p.objetivo) + ' · Saída esperada: ' + esc(p.saida) + '</div>' +
+        '<div class="d"><b>Critério de avanço:</b> ' + esc(p.criterio) + '</div></div>' +
+        '<div class="linha"><label>Anotações / status</label>' + campo('plano.' + i + '.obs', p.obs, 'textarea', 'O que aconteceu? O que falta?') + '</div>' +
+        '</div>'
+      ).join('');
+      h += '<details><summary>＋ Adicionar atividade extra</summary><div class="detalhe-corpo">' +
+        '<div class="linha"><label>Etapa / nome</label><input type="text" id="novoPlanoEtapa" placeholder="ex.: 8. Teste de preço"></div>' +
+        '<div class="linha"><label>Atividade</label><textarea id="novoPlanoAtiv" placeholder="O que fazer..."></textarea></div>' +
+        '<div class="grid-2">' +
+        '<div class="linha"><label>Saída esperada</label><input type="text" id="novoPlanoSaida"></div>' +
+        '<div class="linha"><label>Prazo sugerido</label><input type="text" id="novoPlanoPrazo" placeholder="ex.: Dia 15"></div>' +
+        '</div>' +
+        '<button class="btn btn-primary full" data-add="plano" type="button">Adicionar atividade</button>' +
+        '</div></details>';
+      h += '</section>';
+      return h;
+    }
+
+    // ---------- Pesquisa documental ----------
+    function renderPesquisa(){
+      let h = '<section class="form-section"><h2>Síntese documental — 16 ideias</h2>';
+      h += '<div class="note warn">' + esc(DADOS.notas.pesquisaA2) + '</div>';
+      h += state.ideias.map((it, i) => {
+        const p = it.pesquisa;
+        const temDoc = p.encontrou || p.lacuna || p.relatorio;
+        return '<details><summary><span>#' + (i + 1) + ' ' + esc((it.nome || '(ideia sem nome)').slice(0, 56)) + '</span>' +
+          (p.posicao ? '<span class="chip cinza" style="font-weight:600">' + esc(p.posicao.replace('.', ',')) + '</span>' : '') +
+          '</summary><div class="detalhe-corpo">' +
+          (p.posicao ? '<small>Posição/nota preliminar da aba Análise (não validada): <b>' + esc(p.posicao.replace('.', ',')) + '</b></small>' : '') +
+          '<div class="linha"><label>O que a pesquisa documental encontrou</label>' + campo('ideias.' + i + '.pesquisa.encontrou', p.encontrou, 'textarea') + '</div>' +
+          '<div class="linha"><label>Lacuna que continua aberta</label>' + campo('ideias.' + i + '.pesquisa.lacuna', p.lacuna, 'textarea') + '</div>' +
+          '<div class="linha"><label>Próximo teste humano sugerido</label>' + campo('ideias.' + i + '.pesquisa.proximoTeste', p.proximoTeste, 'textarea') + '</div>' +
+          '<div class="grid-2">' +
+          '<div class="linha"><label>Status da validação humana</label><select data-path="ideias.' + i + '.pesquisa.status">' +
+          ['PENDENTE — não executada','Em andamento','Concluída'].map(o =>
+            '<option' + (p.status === o ? ' selected' : '') + '>' + o + '</option>').join('') +
+          '</select></div>' +
+          '<div class="linha"><label>Relatório documental de origem</label>' + campo('ideias.' + i + '.pesquisa.relatorio', p.relatorio, 'text', 'ex.: FASE2_ID01_....md') + '</div>' +
+          '</div>' +
+          (temDoc ? '' : '<small>Ideia sem pesquisa documental registrada (criada por você) — preencha o que encontrar.</small>') +
+          '</div></details>';
+      }).join('');
+      h += '</section>';
+      return h;
+    }
+
+    // ---------- Fontes ----------
+    function renderFontes(){
+      let h = '<section class="form-section"><h2>Fontes externas usadas na triagem</h2>';
+      h += state.fontes.map((f, i) =>
+        '<div class="card"><div class="card-top"><span class="chip azul">' + esc(f.tema) + '</span>' +
+        '<button class="btn btn-danger btn-mini" data-rm="fonte:' + i + '" type="button">Remover</button></div>' +
+        '<div class="linha"><label>Fonte</label>' + campo('fontes.' + i + '.fonte', f.fonte) + '</div>' +
+        '<div class="linha"><label>O que sustenta</label>' + campo('fontes.' + i + '.sustenta', f.sustenta, 'textarea') + '</div>' +
+        '<div class="linha"><label>URL</label>' + campo('fontes.' + i + '.url', f.url, 'url') + '</div>' +
+        (f.url ? '<a class="fonte-url" href="' + esc(f.url) + '" target="_blank" rel="noopener">Abrir fonte ↗</a>' : '') +
+        '</div>'
+      ).join('');
+      h += '<button class="btn btn-primary full" data-add="fonte" type="button">＋ Adicionar nova fonte</button>';
+      h += '</section>';
+      return h;
+    }
+
+    // ---------- Bia (25) ----------
+    const BIA_GRUPOS = [
+      {t:'Contexto', campos:[
+        ['biaNome','1. Nome','text'],['biaIdade','2. Idade','text'],['biaOndeMora','3. Onde mora','text'],
+        ['biaFormacao','4. Formação','text'],['biaTempoArea','5. Há quanto tempo trabalha na área','text'],
+        ['biaTamanhoLab','6. Tamanho do laboratório (pessoas)','text'],['biaAmostras','7. Nº de amostras/semana','text']
+      ]},
+      {t:'Trabalho', campos:[
+        ['biaRotina','8. Rotina diária','textarea'],['biaTempoPerdido','9. Onde perde mais tempo','textarea'],
+        ['biaErros','10. Onde erra mais','textarea'],['biaPrazos','11. Como lida com prazos','textarea'],
+        ['biaAuditorias','12. Como lida com auditorias','textarea'],['biaClientes','13. Como lida com clientes','textarea']
+      ]},
+      {t:'Ferramentas', campos:[
+        ['biaFerramentas','14. O que usa hoje','textarea'],['biaFalta','15. O que falta','textarea'],
+        ['biaTestou','16. O que já testou','textarea'],['biaAutomacao','17. O que acha de automação','textarea']
+      ]},
+      {t:'Dores', campos:[
+        ['biaDorPrincipal','18. Dor principal','textarea'],['biaDorSecundaria','19. Dor secundária','textarea'],
+        ['biaDorUrgente','20. Dor mais urgente','textarea'],['biaQuemSente','21. Quem sente mais','textarea'],
+        ['biaQuemDecide','22. Quem decide','textarea']
+      ]},
+      {t:'Decisão', campos:[
+        ['biaMudar','23. O que faria mudar','textarea'],['biaPagaria','24. Quanto pagaria','textarea'],
+        ['biaProximoPasso','25. Próximo passo','textarea']
+      ]}
+    ];
+    function renderBia(){
+      let h = '<section class="form-section"><h2>Bia — entrevista complementar (25 campos)</h2>';
+      h += '<div class="note">Questionário complementar mantido da versão anterior do formulário. Preencha em ordem; tudo é salvo automaticamente.</div>';
+      h += BIA_GRUPOS.map(g =>
+        '<h3>' + esc(g.t) + '</h3>' + g.campos.map(c =>
+          '<div class="linha"><label>' + esc(c[1]) + '</label>' + campo('bia.' + c[0], state.bia[c[0]] || '', c[2]) + '</div>'
+        ).join('')
+      ).join('');
+      h += '</section>';
+      return h;
+    }
+
+    // ---------- Como usar ----------
+    function renderAjuda(){
+      let h = '<section class="form-section"><h2>Como usar</h2>';
+      h += DADOS.comoUsar.map(t => {
+        const limpo = t.replace(/^[•]\s*/, '');
+        const isTitulo = /^[A-ZÁÉÍÓÚÇÃÕ]{3,}$/.test(limpo.trim()) || limpo.startsWith('OBJETIVO') || limpo.startsWith('PESOS') || limpo.startsWith('SUGESTÃO');
+        if (/^[•]/.test(t)) return '<p style="margin:8px 0">• ' + esc(limpo) + '</p>';
+        if (isTitulo) return '<h3>' + esc(limpo) + '</h3>';
+        return '<p style="margin:8px 0">' + esc(limpo) + '</p>';
+      }).join('');
+      h += '<div class="note"><b>Neste formulário:</b> cada aba da planilha virou uma tela. Ideias, dores, perguntas, fontes e atividades podem ser <b>adicionadas e removidas</b>. A nota final, o ranking e os indicadores da “Visão geral” são calculados sozinhos. Use <b>“Baixar backup JSON”</b> para guardar uma cópia dos dados e <b>“⬇ Baixar este arquivo (HTML)”</b> para salvar o formulário no aparelho.</div>';
+      h += '</section>';
+      return h;
+    }
+
+    const renderers = {
+      visao: renderVisao, ideias: renderIdeias, criterios: renderCriterios, roteiro: renderRoteiro,
+      dores: renderDores, matriz: renderMatriz, plano: renderPlano, pesquisa: renderPesquisa,
+      fontes: renderFontes, bia: renderBia, ajuda: renderAjuda
+    };
+
+    // ==================== UI: STATUS / PROGRESSO / TOAST ====================
+    function atualizarStatus(){
+      const el = document.getElementById('status');
+      if (!el) return;
+      el.textContent = 'Salvo automaticamente às ' + new Date().toLocaleTimeString('pt-BR') + '.';
+    }
+    function mostrarProgresso(){
+      const prog = document.getElementById('progresso');
+      const bar = document.getElementById('progressoBar');
+      if (!prog || !bar) return;
+      prog.style.display = 'block';
+      bar.style.width = '0';
+      setTimeout(() => { bar.style.width = '100%'; }, 10);
+    }
+    function esconderProgresso(){
+      const prog = document.getElementById('progresso');
+      if (!prog) return;
+      setTimeout(() => { prog.style.display = 'none'; }, 300);
+    }
+    function mostrarToast(msg, tipo){
+      const t = document.createElement('div');
+      t.className = 'toast show ' + (tipo || 'ok');
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 300);
+      }, 2500);
+    }
+
+    // ==================== AÇÕES DINÂMICAS ====================
+    function adicionar(tipo){
+      if (tipo === 'ideia'){
+        state.ideias.push({
+          num: state.ideias.length + 1, area: 'Nova ideia', nome: '',
+          notas: notasVazias(), obs: '',
+          matriz: {evidencia:'', resolvem:'', tempo:'', quemUsa:'', quemPaga:'', concorrentes:'', preco:'', proximoTeste:'Entrevistar 3–5 potenciais usuários; obter exemplo concreto e quantificar custo.'},
+          pesquisa: {posicao:'', encontrou:'', lacuna:'', proximoTeste:'', status:'PENDENTE — não executada', relatorio:''}
+        });
+      } else if (tipo === 'dor'){
+        state.dores.push(novaDor());
+      } else if (tipo === 'fonte'){
+        state.fontes.push({tema:'', fonte:'', sustenta:'', url:''});
+      } else if (tipo === 'pergunta'){
+        const txt = (document.getElementById('novaPergunta') || {}).value || '';
+        if (!txt.trim()){ mostrarToast('Escreva a pergunta antes de adicionar.', 'err'); return; }
+        let bloco = (document.getElementById('novoBloco') || {}).value || 'Novo bloco';
+        if (bloco === '__novo') bloco = prompt('Nome do novo bloco:') || 'Novo bloco';
+        const tempo = (document.getElementById('novoTempo') || {}).value || '';
+        state.roteiro.push({bloco, tempo, pergunta: txt.trim(), descobrir:'', anota:'', custom:true});
+      } else if (tipo === 'plano'){
+        const etapa = (document.getElementById('novoPlanoEtapa') || {}).value || 'Nova atividade';
+        const ativ = (document.getElementById('novoPlanoAtiv') || {}).value || '';
+        const saida = (document.getElementById('novoPlanoSaida') || {}).value || '';
+        const prazo = (document.getElementById('novoPlanoPrazo') || {}).value || '';
+        state.plano.push({etapa, objetivo:'', atividade: ativ, saida, criterio:'', prazo, status:'Não iniciado', obs:''});
+      }
+      salvarTudo();
+      setView(abaAtual);
+    }
+
+    function remover(ref){
+      const [tipo, idxStr] = ref.split(':');
+      const i = parseInt(idxStr, 10);
+      if (tipo === 'ideia'){
+        if (!confirm('Remover esta ideia?')) return;
+        state.ideias.splice(i, 1);
+      } else if (tipo === 'dor'){
+        state.dores.splice(i, 1);
+      } else if (tipo === 'fonte'){
+        state.fontes.splice(i, 1);
+      } else if (tipo === 'pergunta'){
+        state.roteiro.splice(i, 1);
+      } else if (tipo === 'plano'){
+        state.plano.splice(i, 1);
+      }
+      salvarTudo();
+      setView(abaAtual);
+    }
+
+    // ==================== EXPORTAR / BACKUP ====================
+    function exportarJSON(){
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'omena_pesquisa_backup.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    function baixarHTML(){
+      const conteudo = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([conteudo], {type: 'text/html;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Formulario_Omena_Lucas.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    function limparDados(){
+      if (!confirm('Limpar TODOS os dados salvos neste navegador?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+
+    // ==================== EVENTOS ====================
+    document.addEventListener('input', e => {
+      const el = e.target.closest('[data-path]');
+      if (!el) return;
+      setPath(el.dataset.path, el.value);
+      agendarSalvar();
+      if (el.dataset.recalc) atualizarCalculos();
+    });
+    document.addEventListener('change', e => {
+      const el = e.target.closest('[data-path]');
+      if (!el) return;
+      setPath(el.dataset.path, el.value);
+      agendarSalvar();
+      if (el.dataset.recalc) atualizarCalculos();
+    });
+    document.addEventListener('click', e => {
+      const viewBtn = e.target.closest('[data-view]');
+      if (viewBtn){ setView(viewBtn.dataset.view); return; }
+      const addBtn = e.target.closest('[data-add]');
+      if (addBtn){ adicionar(addBtn.dataset.add); return; }
+      const rmBtn = e.target.closest('[data-rm]');
+      if (rmBtn){ remover(rmBtn.dataset.rm); return; }
+    });
+
+    // ==================== INIT ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarDados();
+      document.getElementById('btnSalvar')?.addEventListener('click', () => {
+        salvarTudo();
+        mostrarToast('Dados salvos neste navegador.', 'ok');
+      });
+      document.getElementById('btnExportar')?.addEventListener('click', exportarJSON);
+      document.getElementById('btnBaixarHTML')?.addEventListener('click', baixarHTML);
+      document.getElementById('btnLimpar')?.addEventListener('click', limparDados);
+      window.addEventListener('beforeunload', salvarTudo);
+      setView(abaAtual);
+    });
+  </script>
+</body>
+</html>
